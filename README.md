@@ -94,6 +94,9 @@ response_variable: result
   selbst (RSA + AES-256).
 - Der Benutzer `admin` hat bei Zyxel nur das Level „medium“. LED, SMS-Versand und MQTT sind damit
   nicht verfügbar.
+- Ab HA 2026.3 bringt die Integration ihr Logo selbst mit (`brand/`). Ältere Versionen zeigen
+  stattdessen ein Platzhalter-Icon. Das Zyxel-Logo ist eine Marke der Zyxel Group. Diese
+  Integration ist ein inoffizielles Community-Projekt und steht in keiner Verbindung zu Zyxel.
 - Diagnosedaten (Geräteseite → Diagnose herunterladen) sind anonymisiert und helfen bei der
   Unterstützung weiterer Modelle.
 
