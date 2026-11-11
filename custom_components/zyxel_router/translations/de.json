@@ -364,7 +364,7 @@
         },
         "cells": {
           "name": "Zellen",
-          "description": "Liste wie [{\"pci\": 400, \"earfcn\": 1300}]."
+          "description": "Liste von bis zu 5 Zellen, jeweils mit pci und earfcn (siehe Beispiel)."
         }
       }
     },

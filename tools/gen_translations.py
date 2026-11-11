@@ -156,8 +156,8 @@ SERVICES = {
             "cells": (
                 "Cells",
                 "Zellen",
-                'List like [{"pci": 400, "earfcn": 1300}].',
-                'Liste wie [{"pci": 400, "earfcn": 1300}].',
+                "List of up to 5 cells, each with pci and earfcn (see example).",
+                "Liste von bis zu 5 Zellen, jeweils mit pci und earfcn (siehe Beispiel).",
             )
         },
     ),
