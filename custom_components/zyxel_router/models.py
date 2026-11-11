@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -9,7 +10,9 @@ from .const import (
     FEATURE_BAND,
     FEATURE_CELL_LOCK,
     FEATURE_CELLULAR,
+    FEATURE_DSL,
     FEATURE_GNSS,
+    FEATURE_GPON,
     FEATURE_NR,
     FEATURE_NR_LOCK,
     FEATURE_SMS,
@@ -53,7 +56,9 @@ def nr_bw(index: Any) -> float | None:
     return NR_BANDWIDTH_MHZ.get(index) if isinstance(index, int) else None
 
 
-def valid(value: Any, invalid: tuple[Any, ...] = (-1, -240, -32768, 0x7FFFFFFF)) -> Any:
+def valid(
+    value: Any, invalid: tuple[Any, ...] = (-1, -120, -140, -240, -32768, 0x7FFFFFFF)
+) -> Any:
     """Return None for sentinel values."""
     if value is None or value in invalid or value == "":
         return None
@@ -212,16 +217,84 @@ class ZyxelData:
 
     @property
     def wan_stats(self) -> dict[str, Any]:
+        """Byte counters of the WAN interface (IP or underlying PPP interface)."""
         idx = self._wan_iface_index()
+        if idx is None:
+            return {}
+        iface = (self.traffic.get("ipIface") or [])[idx]
+        lower = str(iface.get("LowerLayers") or "")
+        ppp_stats = self.traffic.get("pppIfaceSt") or []
+        if lower.startswith("PPP.Interface.") and ppp_stats:
+            try:
+                ppp_idx = int(lower.split(".")[2].rstrip(",")) - 1
+            except (IndexError, ValueError):
+                ppp_idx = 0
+            if 0 <= ppp_idx < len(ppp_stats):
+                return ppp_stats[ppp_idx]
         stats = self.traffic.get("ipIfaceSt") or []
-        return stats[idx] if idx is not None and idx < len(stats) else {}
+        return stats[idx] if idx < len(stats) else {}
+
+    @property
+    def wan_link_type(self) -> str | None:
+        """CELL, DSL, ETH, PON, ... of the default WAN."""
+        link = self.wan.get("LinkType")
+        return str(link).lower() if link else None
 
     @property
     def wan_connected(self) -> bool | None:
-        status = self.cell.get("INTF_Status")
-        if status is None and not self.wan:
+        wan = self.wan
+        cell_status = self.cell.get("INTF_Status")
+        if not wan and cell_status is None:
             return None
-        return status == "Up" and (self.wan.get("Status", "Up") == "Up")
+        wan_up = wan.get("Status", "Up") == "Up" if wan else True
+        ppp = wan.get("pppConnectionStatus")
+        if ppp:
+            wan_up = wan_up and ppp == "Connected"
+        if cell_status is not None and (wan.get("LinkType") or "CELL") == "CELL":
+            return cell_status == "Up" and wan_up
+        return wan_up
+
+    # ----------------------------------------------------------------- DSL
+    @property
+    def dsl_channels(self) -> list[dict[str, Any]]:
+        return [c for c in self.status.get("DslChannelInfo") or [] if isinstance(c, dict)]
+
+    @property
+    def dsl(self) -> dict[str, Any]:
+        """Active (or first) DSL channel."""
+        channels = self.dsl_channels
+        for channel in channels:
+            if channel.get("Status") == "Up":
+                return channel
+        return channels[0] if channels else {}
+
+    def dsl_rate(self, key: str) -> float | None:
+        """DSL sync rate in Mbit/s (DAL reports kbit/s)."""
+        value = self.dsl.get(key)
+        if not isinstance(value, (int, float)) or value <= 0:
+            return None
+        return round(value / 1000, 3)
+
+    # ---------------------------------------------------------------- GPON
+    @property
+    def gpon(self) -> dict[str, Any]:
+        info = self.status.get("GponStatsInfo") or {}
+        # AX7501 nests the values one level deeper
+        nested = info.get("gponStatusObj")
+        return {**info, **nested} if isinstance(nested, dict) else info
+
+    def gpon_value(self, key: str) -> float | None:
+        """Parse a GPON value like '-18.5' or '-18.5 dBm'; '0'/'' means not available."""
+        raw = self.gpon.get(key)
+        if raw in (None, "", "0", 0):
+            return None
+        match = re.search(r"-?\d+(?:\.\d+)?", str(raw))
+        return float(match.group()) if match else None
+
+    # ----------------------------------------------------------------- LAN
+    @property
+    def lan_ports(self) -> list[dict[str, Any]]:
+        return [p for p in self.status.get("LanPortInfo") or [] if isinstance(p, dict)]
 
     @property
     def operator(self) -> str | None:
@@ -378,4 +451,11 @@ class ZyxelData:
             feats.add(FEATURE_BAND)
         if any(k.startswith("X_ZYXEL_TEMPERATURE_") for k in self.cell_intf):
             feats.add(FEATURE_TEMPERATURE)
+        if self.dsl_channels:
+            feats.add(FEATURE_DSL)
+        gpon = self.gpon
+        if gpon.get("SFP_Presence") not in (None, "", "0", 0, False) or self.gpon_value(
+            "RxPowerSignal"
+        ) is not None:
+            feats.add(FEATURE_GPON)
         return feats

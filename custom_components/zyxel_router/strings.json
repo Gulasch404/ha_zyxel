@@ -37,7 +37,8 @@
     "error": {
       "cannot_connect": "Failed to connect",
       "invalid_auth": "Invalid authentication",
-      "unknown": "Unexpected error"
+      "unknown": "Unexpected error",
+      "session_busy": "The router reports that this user is already logged in. Log out of the router's web interface (or wait about 5 minutes) and try again."
     },
     "abort": {
       "already_configured": "Device is already configured",
@@ -205,6 +206,42 @@
       "lan_speed": {
         "name": "LAN link speed"
       },
+      "wan_type": {
+        "name": "WAN type",
+        "state": {
+          "cell": "Cellular",
+          "dsl": "DSL",
+          "eth": "Ethernet",
+          "pon": "Fiber (PON)",
+          "atm": "DSL (ATM)",
+          "ptm": "DSL (PTM)",
+          "usb": "USB modem"
+        }
+      },
+      "dsl_status": {
+        "name": "DSL status"
+      },
+      "dsl_downstream": {
+        "name": "DSL downstream rate"
+      },
+      "dsl_upstream": {
+        "name": "DSL upstream rate"
+      },
+      "dsl_encapsulation": {
+        "name": "DSL encapsulation"
+      },
+      "optical_rx_power": {
+        "name": "Optical RX power"
+      },
+      "optical_tx_power": {
+        "name": "Optical TX power"
+      },
+      "optical_temperature": {
+        "name": "Optical module temperature"
+      },
+      "lan_port_speed": {
+        "name": "{port} link speed"
+      },
       "apn": {
         "name": "APN"
       },
@@ -232,7 +269,7 @@
     },
     "binary_sensor": {
       "wan_connected": {
-        "name": "Mobile connection"
+        "name": "Internet connection"
       },
       "nr_connected": {
         "name": "5G active"

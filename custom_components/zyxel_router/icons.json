@@ -1,78 +1,237 @@
 {
   "entity": {
     "sensor": {
-      "access_technology": { "default": "mdi:signal-5g" },
-      "operator": { "default": "mdi:radio-tower" },
-      "band": { "default": "mdi:sine-wave" },
-      "ca_bands": { "default": "mdi:sine-wave" },
-      "carrier_count": { "default": "mdi:layers-triple" },
-      "total_bandwidth": { "default": "mdi:arrow-expand-horizontal" },
-      "rssi": { "default": "mdi:signal" },
-      "rsrp": { "default": "mdi:signal" },
-      "rsrq": { "default": "mdi:signal-variant" },
-      "sinr": { "default": "mdi:signal-distance-variant" },
-      "cqi": { "default": "mdi:quality-high" },
-      "cell_id": { "default": "mdi:radio-tower" },
-      "enb_id": { "default": "mdi:radio-tower" },
-      "pci": { "default": "mdi:identifier" },
-      "earfcn": { "default": "mdi:sine-wave" },
-      "nr_band": { "default": "mdi:signal-5g" },
-      "nr_rsrp": { "default": "mdi:signal-5g" },
-      "nr_rsrq": { "default": "mdi:signal-5g" },
-      "nr_sinr": { "default": "mdi:signal-5g" },
-      "sim_status": { "default": "mdi:sim" },
-      "imei": { "default": "mdi:cellphone-information" },
-      "imsi": { "default": "mdi:sim" },
-      "iccid": { "default": "mdi:sim" },
-      "preferred_bands": { "default": "mdi:tune-vertical" },
-      "modem_firmware": { "default": "mdi:chip" },
-      "wan_ipv4": { "default": "mdi:ip-network" },
-      "wan_ipv6": { "default": "mdi:ip-network" },
-      "download_rate": { "default": "mdi:download-network" },
-      "upload_rate": { "default": "mdi:upload-network" },
-      "wan_received": { "default": "mdi:download" },
-      "wan_sent": { "default": "mdi:upload" },
-      "wan_connected_since": { "default": "mdi:timer-outline" },
-      "clients": { "default": "mdi:devices" },
-      "wifi_clients": { "default": "mdi:wifi" },
-      "lan_speed": { "default": "mdi:ethernet" },
-      "apn": { "default": "mdi:access-point-network" },
-      "gnss_satellites":{ "default": "mdi:satellite-variant" },
-      "gnss_altitude": { "default": "mdi:altimeter" },
-      "gnss_last_fix": { "default": "mdi:crosshairs-gps" },
-      "sms_inbox": { "default": "mdi:message-text" }
+      "access_technology": {
+        "default": "mdi:signal-5g"
+      },
+      "operator": {
+        "default": "mdi:radio-tower"
+      },
+      "band": {
+        "default": "mdi:sine-wave"
+      },
+      "ca_bands": {
+        "default": "mdi:sine-wave"
+      },
+      "carrier_count": {
+        "default": "mdi:layers-triple"
+      },
+      "total_bandwidth": {
+        "default": "mdi:arrow-expand-horizontal"
+      },
+      "rssi": {
+        "default": "mdi:signal"
+      },
+      "rsrp": {
+        "default": "mdi:signal"
+      },
+      "rsrq": {
+        "default": "mdi:signal-variant"
+      },
+      "sinr": {
+        "default": "mdi:signal-distance-variant"
+      },
+      "cqi": {
+        "default": "mdi:quality-high"
+      },
+      "cell_id": {
+        "default": "mdi:radio-tower"
+      },
+      "enb_id": {
+        "default": "mdi:radio-tower"
+      },
+      "pci": {
+        "default": "mdi:identifier"
+      },
+      "earfcn": {
+        "default": "mdi:sine-wave"
+      },
+      "nr_band": {
+        "default": "mdi:signal-5g"
+      },
+      "nr_rsrp": {
+        "default": "mdi:signal-5g"
+      },
+      "nr_rsrq": {
+        "default": "mdi:signal-5g"
+      },
+      "nr_sinr": {
+        "default": "mdi:signal-5g"
+      },
+      "sim_status": {
+        "default": "mdi:sim"
+      },
+      "imei": {
+        "default": "mdi:cellphone-information"
+      },
+      "imsi": {
+        "default": "mdi:sim"
+      },
+      "iccid": {
+        "default": "mdi:sim"
+      },
+      "preferred_bands": {
+        "default": "mdi:tune-vertical"
+      },
+      "modem_firmware": {
+        "default": "mdi:chip"
+      },
+      "wan_ipv4": {
+        "default": "mdi:ip-network"
+      },
+      "wan_ipv6": {
+        "default": "mdi:ip-network"
+      },
+      "download_rate": {
+        "default": "mdi:download-network"
+      },
+      "upload_rate": {
+        "default": "mdi:upload-network"
+      },
+      "wan_received": {
+        "default": "mdi:download"
+      },
+      "wan_sent": {
+        "default": "mdi:upload"
+      },
+      "wan_connected_since": {
+        "default": "mdi:timer-outline"
+      },
+      "clients": {
+        "default": "mdi:devices"
+      },
+      "wifi_clients": {
+        "default": "mdi:wifi"
+      },
+      "lan_speed": {
+        "default": "mdi:ethernet"
+      },
+      "apn": {
+        "default": "mdi:access-point-network"
+      },
+      "gnss_satellites": {
+        "default": "mdi:satellite-variant"
+      },
+      "gnss_altitude": {
+        "default": "mdi:altimeter"
+      },
+      "gnss_last_fix": {
+        "default": "mdi:crosshairs-gps"
+      },
+      "sms_inbox": {
+        "default": "mdi:message-text"
+      },
+      "wan_type": {
+        "default": "mdi:wan"
+      },
+      "dsl_status": {
+        "default": "mdi:phone-classic"
+      },
+      "dsl_downstream": {
+        "default": "mdi:download-network"
+      },
+      "dsl_upstream": {
+        "default": "mdi:upload-network"
+      },
+      "dsl_encapsulation": {
+        "default": "mdi:package-variant"
+      },
+      "optical_rx_power": {
+        "default": "mdi:led-on"
+      },
+      "optical_tx_power": {
+        "default": "mdi:led-outline"
+      },
+      "optical_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "lan_port_speed": {
+        "default": "mdi:ethernet"
+      }
     },
     "binary_sensor": {
-      "nr_connected": { "default": "mdi:signal-5g" },
-      "roaming": { "default": "mdi:earth" },
-      "band_lock": { "default": "mdi:lock-outline", "state": { "off": "mdi:lock-open-variant-outline" } },
-      "cell_lock": { "default": "mdi:lock-outline", "state": { "off": "mdi:lock-open-variant-outline" } },
-      "nr_cell_lock": { "default": "mdi:lock-outline", "state": { "off": "mdi:lock-open-variant-outline" } },
-      "ip_passthrough": { "default": "mdi:arrow-right-bold-box-outline" }
+      "nr_connected": {
+        "default": "mdi:signal-5g"
+      },
+      "roaming": {
+        "default": "mdi:earth"
+      },
+      "band_lock": {
+        "default": "mdi:lock-outline",
+        "state": {
+          "off": "mdi:lock-open-variant-outline"
+        }
+      },
+      "cell_lock": {
+        "default": "mdi:lock-outline",
+        "state": {
+          "off": "mdi:lock-open-variant-outline"
+        }
+      },
+      "nr_cell_lock": {
+        "default": "mdi:lock-outline",
+        "state": {
+          "off": "mdi:lock-open-variant-outline"
+        }
+      },
+      "ip_passthrough": {
+        "default": "mdi:arrow-right-bold-box-outline"
+      }
     },
     "switch": {
-      "wlan": { "default": "mdi:wifi", "state": { "off": "mdi:wifi-off" } },
-      "roaming": { "default": "mdi:earth" }
+      "wlan": {
+        "default": "mdi:wifi",
+        "state": {
+          "off": "mdi:wifi-off"
+        }
+      },
+      "roaming": {
+        "default": "mdi:earth"
+      }
     },
     "select": {
-      "network_mode": { "default": "mdi:signal-cellular-3" }
+      "network_mode": {
+        "default": "mdi:signal-cellular-3"
+      }
     },
     "button": {
-      "refresh": { "default": "mdi:refresh" }
+      "refresh": {
+        "default": "mdi:refresh"
+      }
     },
     "device_tracker": {
-      "gnss": { "default": "mdi:crosshairs-gps" }
+      "gnss": {
+        "default": "mdi:crosshairs-gps"
+      }
     }
   },
   "services": {
-    "set_preferred_bands": { "service": "mdi:tune-vertical" },
-    "set_network_mode": { "service": "mdi:signal-cellular-3" },
-    "set_cell_lock": { "service": "mdi:lock" },
-    "clear_cell_lock": { "service": "mdi:lock-open-variant" },
-    "set_nr_cell_lock": { "service": "mdi:lock" },
-    "clear_nr_cell_lock": { "service": "mdi:lock-open-variant" },
-    "delete_sms": { "service": "mdi:message-minus" },
-    "dal_get": { "service": "mdi:database-search" },
-    "dal_set": { "service": "mdi:database-edit" }
+    "set_preferred_bands": {
+      "service": "mdi:tune-vertical"
+    },
+    "set_network_mode": {
+      "service": "mdi:signal-cellular-3"
+    },
+    "set_cell_lock": {
+      "service": "mdi:lock"
+    },
+    "clear_cell_lock": {
+      "service": "mdi:lock-open-variant"
+    },
+    "set_nr_cell_lock": {
+      "service": "mdi:lock"
+    },
+    "clear_nr_cell_lock": {
+      "service": "mdi:lock-open-variant"
+    },
+    "delete_sms": {
+      "service": "mdi:message-minus"
+    },
+    "dal_get": {
+      "service": "mdi:database-search"
+    },
+    "dal_set": {
+      "service": "mdi:database-edit"
+    }
   }
 }

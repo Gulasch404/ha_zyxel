@@ -45,6 +45,10 @@ class ZyxelAuthError(ZyxelError):
     """Authentication failed."""
 
 
+class ZyxelSessionBusyError(ZyxelConnectionError):
+    """The user is already logged in elsewhere (single-session firmwares)."""
+
+
 class ZyxelApiError(ZyxelError):
     """DAL returned an error result."""
 
@@ -68,7 +72,12 @@ def _aes_decrypt(content_b64: str, key_b64: str, iv_b64: str) -> str:
     dec = Cipher(algorithms.AES(key), modes.CBC(iv)).decryptor()
     data = dec.update(base64.b64decode(content_b64)) + dec.finalize()
     unpadder = padding.PKCS7(128).unpadder()
-    return (unpadder.update(data) + unpadder.finalize()).decode("utf-8", "replace")
+    try:
+        plain = unpadder.update(data) + unpadder.finalize()
+    except ValueError:
+        # some firmwares pad with zero bytes instead of PKCS7
+        plain = data.rstrip(b"\x00").rstrip(bytes(range(1, 17)))
+    return plain.decode("utf-8", "replace")
 
 
 def _random_b64(size: int = 32) -> str:
@@ -127,6 +136,7 @@ class ZyxelClient:
         params: dict[str, str] | None = None,
         body: str | None = None,
         timeout: int | None = None,
+        headers: dict[str, str] | None = None,
     ) -> tuple[int, Any]:
         url = self._base + path
         try:
@@ -135,7 +145,7 @@ class ZyxelClient:
                 url,
                 params=params,
                 data=body,
-                headers={"If-Modified-Since": "Thu, 01 Jun 1970 00:00:00 GMT"},
+                headers={"If-Modified-Since": "Thu, 01 Jun 1970 00:00:00 GMT", **(headers or {})},
                 ssl=self._verify_ssl if self._use_https else None,
                 timeout=aiohttp.ClientTimeout(total=timeout) if timeout else self._timeout,
             ) as resp:
@@ -186,6 +196,9 @@ class ZyxelClient:
         self.logged_in = False
         self._session_key = None
         rsa: RSAPublicKey | None = None
+        # some firmwares only hand out the session cookie here
+        with contextlib.suppress(ZyxelError):
+            await self._raw("GET", "/GetInfoNoLogin", timeout=10)
         if self._encrypt:
             _, key_resp = await self._raw("GET", "/getRSAPublickKey", timeout=15)
             pem = key_resp.get("RSAPublicKey") if isinstance(key_resp, dict) else None
@@ -205,6 +218,10 @@ class ZyxelClient:
         status, data = await self._raw(
             "POST", "/UserLogin", body=self._encrypt_body(payload, rsa)
         )
+        if isinstance(data, dict) and "duplicate" in str(data.get("result", "")).lower():
+            raise ZyxelSessionBusyError(
+                "Router reports an active login of this user (web interface open?)"
+            )
         if status in (401, 403) or not isinstance(data, dict):
             raise ZyxelAuthError(f"Login failed (HTTP {status}): {data}")
         if data.get("result") not in (None, "ZCFG_SUCCESS"):
@@ -232,11 +249,15 @@ class ZyxelClient:
         timeout: int | None = None,
     ) -> Any:
         params = dict(params or {})
-        if method in ("POST", "PUT", "DELETE") and self._session_key:
+        headers: dict[str, str] = {}
+        if self._session_key and path.startswith("/cgi-bin/"):
+            # newer firmwares expect the (rotating) session key on every request
             params["sessionkey"] = self._session_key
+            if method in ("POST", "PUT", "DELETE"):
+                headers["CSRFToken"] = self._session_key
         body = self._encrypt_body(payload) if payload is not None else None
         status, data = await self._raw(
-            method, path, params=params, body=body, timeout=timeout
+            method, path, params=params, body=body, timeout=timeout, headers=headers
         )
         if status in (401, 403) or (
             isinstance(data, dict) and data.get("result") == "Invalid Session"

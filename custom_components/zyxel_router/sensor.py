@@ -29,7 +29,9 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     FEATURE_CELLULAR,
+    FEATURE_DSL,
     FEATURE_GNSS,
+    FEATURE_GPON,
     FEATURE_NR,
     FEATURE_SMS,
     FEATURE_TEMPERATURE,
@@ -456,6 +458,81 @@ SENSORS: tuple[ZyxelSensorDescription, ...] = (
         ),
     ),
     ZyxelSensorDescription(
+        key="wan_type",
+        translation_key="wan_type",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda d: d.wan_link_type,
+        attr_fn=lambda d: {
+            "encapsulation": d.wan.get("Encapsulation"),
+            "connection": d.wan.get("pppConnectionStatus") or d.wan.get("Status"),
+        },
+    ),
+    # --------------------------------------------------------------- DSL
+    ZyxelSensorDescription(
+        key="dsl_status",
+        translation_key="dsl_status",
+        feature=FEATURE_DSL,
+        value_fn=lambda d: d.dsl.get("Status"),
+    ),
+    ZyxelSensorDescription(
+        key="dsl_downstream",
+        translation_key="dsl_downstream",
+        feature=FEATURE_DSL,
+        native_unit_of_measurement=UnitOfDataRate.MEGABITS_PER_SECOND,
+        device_class=SensorDeviceClass.DATA_RATE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.dsl_rate("DownstreamCurrRate"),
+    ),
+    ZyxelSensorDescription(
+        key="dsl_upstream",
+        translation_key="dsl_upstream",
+        feature=FEATURE_DSL,
+        native_unit_of_measurement=UnitOfDataRate.MEGABITS_PER_SECOND,
+        device_class=SensorDeviceClass.DATA_RATE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.dsl_rate("UpstreamCurrRate"),
+    ),
+    ZyxelSensorDescription(
+        key="dsl_encapsulation",
+        translation_key="dsl_encapsulation",
+        feature=FEATURE_DSL,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda d: d.dsl.get("LinkEncapsulationUsed") or None,
+    ),
+    # -------------------------------------------------------------- GPON
+    ZyxelSensorDescription(
+        key="optical_rx_power",
+        translation_key="optical_rx_power",
+        feature=FEATURE_GPON,
+        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.gpon_value("RxPowerSignal"),
+        attr_fn=lambda d: {
+            "sfp_vendor": d.gpon.get("SFP_Vendor") or None,
+            "sfp_model": d.gpon.get("SFP_Model") or None,
+        },
+    ),
+    ZyxelSensorDescription(
+        key="optical_tx_power",
+        translation_key="optical_tx_power",
+        feature=FEATURE_GPON,
+        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.gpon_value("TxPowerSignal"),
+    ),
+    ZyxelSensorDescription(
+        key="optical_temperature",
+        translation_key="optical_temperature",
+        feature=FEATURE_GPON,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.gpon_value("Temperature"),
+    ),
+    ZyxelSensorDescription(
         key="apn",
         translation_key="apn",
         feature=FEATURE_CELLULAR,
@@ -538,11 +615,19 @@ async def async_setup_entry(
     """Set up sensors."""
     coordinator = entry.runtime_data
     features = coordinator.data.features
-    async_add_entities(
+    ports = coordinator.data.lan_ports
+    multi_port = len(ports) > 1
+    entities: list[SensorEntity] = [
         ZyxelSensor(coordinator, desc)
         for desc in SENSORS
-        if desc.feature is None or desc.feature in features
-    )
+        if (desc.feature is None or desc.feature in features)
+        and not (multi_port and desc.key == "lan_speed")
+    ]
+    if multi_port:
+        for idx, port in enumerate(ports):
+            name = port.get("X_ZYXEL_LanPort") or f"LAN{idx + 1}"
+            entities.append(ZyxelLanPortSensor(coordinator, idx, str(name)))
+    async_add_entities(entities)
 
 
 class ZyxelSensor(ZyxelEntity, SensorEntity):
@@ -563,3 +648,33 @@ class ZyxelSensor(ZyxelEntity, SensorEntity):
         if self.entity_description.attr_fn is None:
             return None
         return self.entity_description.attr_fn(self.coordinator.data)
+
+
+class ZyxelLanPortSensor(ZyxelEntity, SensorEntity):
+    """Link speed of one LAN port (devices with several ports)."""
+
+    _attr_translation_key = "lan_port_speed"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_native_unit_of_measurement = UnitOfDataRate.MEGABITS_PER_SECOND
+    _attr_device_class = SensorDeviceClass.DATA_RATE
+
+    def __init__(self, coordinator: ZyxelCoordinator, index: int, name: str) -> None:
+        super().__init__(coordinator, f"lan_speed_{name.lower()}")
+        self._index = index
+        self._attr_translation_placeholders = {"port": name}
+
+    def _port(self) -> dict[str, Any]:
+        ports = self.coordinator.data.lan_ports
+        return ports[self._index] if self._index < len(ports) else {}
+
+    @property
+    def native_value(self) -> int | None:
+        port = self._port()
+        if not port:
+            return None
+        return port.get("MaxBitRate") if port.get("Status") == "Up" else 0
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        port = self._port()
+        return {"status": port.get("Status"), "duplex": port.get("DuplexMode")}

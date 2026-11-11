@@ -21,11 +21,10 @@ MIN_SCAN_INTERVAL: Final = 10
 DEFAULT_SLOW_INTERVAL: Final = 300
 DEFAULT_REVERT_TIMEOUT: Final = 240
 
-# OIDs polled every update
-FAST_OIDS: Final = ("cellwan_status", "Traffic_Status")
+# OIDs polled every update (status holds WAN/DSL/GPON link state)
+FAST_OIDS: Final = ("status", "cellwan_status", "Traffic_Status")
 # OIDs polled every slow interval (and after writes)
 SLOW_OIDS: Final = (
-    "status",
     "cellwan",
     "cellwan_band",
     "cellwan_lock",
@@ -47,6 +46,8 @@ FEATURE_CELL_LOCK: Final = "cell_lock"
 FEATURE_NR_LOCK: Final = "nr_lock"
 FEATURE_BAND: Final = "band"
 FEATURE_TEMPERATURE: Final = "temperature"
+FEATURE_DSL: Final = "dsl"
+FEATURE_GPON: Final = "gpon"
 
 # Services
 SERVICE_SET_PREFERRED_BANDS: Final = "set_preferred_bands"

@@ -16,7 +16,7 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_SCAN_INTERVAL, CO
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 
-from .api import ZyxelAuthError, ZyxelConnectionError, ZyxelError
+from .api import ZyxelAuthError, ZyxelConnectionError, ZyxelError, ZyxelSessionBusyError
 from .const import (
     CONF_ALLOW_CELLULAR_CHANGES,
     CONF_ALLOW_RAW_WRITES,
@@ -76,6 +76,8 @@ class ZyxelConfigFlow(ConfigFlow, domain=DOMAIN):
             return await _validate(self.hass, data)
         except ZyxelAuthError:
             errors["base"] = "invalid_auth"
+        except ZyxelSessionBusyError:
+            errors["base"] = "session_busy"
         except ZyxelConnectionError:
             errors["base"] = "cannot_connect"
         except ZyxelError:

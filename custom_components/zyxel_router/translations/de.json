@@ -37,7 +37,8 @@
     "error": {
       "cannot_connect": "Verbindung fehlgeschlagen",
       "invalid_auth": "Ungültige Anmeldedaten",
-      "unknown": "Unerwarteter Fehler"
+      "unknown": "Unerwarteter Fehler",
+      "session_busy": "Der Router meldet, dass dieser Benutzer bereits angemeldet ist. Melde dich von der Weboberfläche des Routers ab (oder warte etwa 5 Minuten) und versuche es erneut."
     },
     "abort": {
       "already_configured": "Gerät ist bereits eingerichtet",
@@ -205,6 +206,42 @@
       "lan_speed": {
         "name": "LAN-Verbindungsgeschwindigkeit"
       },
+      "wan_type": {
+        "name": "WAN-Typ",
+        "state": {
+          "cell": "Mobilfunk",
+          "dsl": "DSL",
+          "eth": "Ethernet",
+          "pon": "Glasfaser (PON)",
+          "atm": "DSL (ATM)",
+          "ptm": "DSL (PTM)",
+          "usb": "USB-Modem"
+        }
+      },
+      "dsl_status": {
+        "name": "DSL-Status"
+      },
+      "dsl_downstream": {
+        "name": "DSL-Downstream-Rate"
+      },
+      "dsl_upstream": {
+        "name": "DSL-Upstream-Rate"
+      },
+      "dsl_encapsulation": {
+        "name": "DSL-Kapselung"
+      },
+      "optical_rx_power": {
+        "name": "Optische Empfangsleistung"
+      },
+      "optical_tx_power": {
+        "name": "Optische Sendeleistung"
+      },
+      "optical_temperature": {
+        "name": "Temperatur optisches Modul"
+      },
+      "lan_port_speed": {
+        "name": "{port} Verbindungsgeschwindigkeit"
+      },
       "apn": {
         "name": "APN"
       },
@@ -232,7 +269,7 @@
     },
     "binary_sensor": {
       "wan_connected": {
-        "name": "Mobilfunkverbindung"
+        "name": "Internetverbindung"
       },
       "nr_connected": {
         "name": "5G aktiv"

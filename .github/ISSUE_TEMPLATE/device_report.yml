@@ -1,0 +1,60 @@
+name: Device report
+description: Report whether the integration works with your Zyxel model
+title: "Device report: <model>"
+labels: ["device report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to grow the list of supported devices!
+        Please attach the diagnostics file: device page → ⋮ → **Download diagnostics**.
+        Serial number, IMEI/IMSI/ICCID, IP and MAC addresses, WiFi keys and GPS position are removed automatically.
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: e.g. NR5103E, VMG8825-T50, PX3321-T1
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      description: Shown on the device page in Home Assistant or in the router's web interface.
+      placeholder: e.g. 1.00(ABVC.4)C0
+    validations:
+      required: true
+  - type: dropdown
+    id: wan
+    attributes:
+      label: Internet connection
+      options:
+        - 5G / LTE
+        - DSL
+        - Fiber (GPON/XGS-PON)
+        - Ethernet WAN
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works, all relevant values are shown
+        - Works partly (describe below)
+        - Setup fails
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What works, what is missing or wrong? Error messages from the log help a lot.
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Drag and drop the diagnostics file here.
+    validations:
+      required: true

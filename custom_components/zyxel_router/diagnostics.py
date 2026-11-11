@@ -8,6 +8,7 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 
+from .api import ZyxelError
 from .coordinator import ZyxelConfigEntry
 
 TO_REDACT = {
@@ -55,5 +56,20 @@ async def async_get_config_entry_diagnostics(
         "options": dict(entry.options),
         "features": sorted(data.features) if data else [],
         "unsupported_oids": sorted(coordinator._unsupported),
+        "menu": await _menu(coordinator),
         "raw": async_redact_data(data.raw, TO_REDACT) if data else None,
     }
+
+
+async def _menu(coordinator) -> list[str] | str:
+    """Page titles of the web GUI menu (shows which functions a model offers)."""
+    try:
+        menu = await coordinator.client.cgi_get("MenuList")
+    except ZyxelError as err:
+        return f"unavailable: {err}"
+    titles: list[str] = []
+    for section in (menu or {}).get("MenuList") or []:
+        for page in section.get("submenu") or []:
+            if page.get("title"):
+                titles.append(f"{section.get('title')} > {page['title']}")
+    return titles

@@ -56,6 +56,15 @@ SENSORS = {
     "clients": ("Connected clients", "Verbundene Geräte"),
     "wifi_clients": ("WiFi clients", "WLAN-Geräte"),
     "lan_speed": ("LAN link speed", "LAN-Verbindungsgeschwindigkeit"),
+    "wan_type": ("WAN type", "WAN-Typ"),
+    "dsl_status": ("DSL status", "DSL-Status"),
+    "dsl_downstream": ("DSL downstream rate", "DSL-Downstream-Rate"),
+    "dsl_upstream": ("DSL upstream rate", "DSL-Upstream-Rate"),
+    "dsl_encapsulation": ("DSL encapsulation", "DSL-Kapselung"),
+    "optical_rx_power": ("Optical RX power", "Optische Empfangsleistung"),
+    "optical_tx_power": ("Optical TX power", "Optische Sendeleistung"),
+    "optical_temperature": ("Optical module temperature", "Temperatur optisches Modul"),
+    "lan_port_speed": ("{port} link speed", "{port} Verbindungsgeschwindigkeit"),
     "apn": ("APN", "APN"),
     "temperature_cpu": ("CPU temperature", "CPU-Temperatur"),
     "temperature_modem": ("Modem temperature", "Modem-Temperatur"),
@@ -66,7 +75,7 @@ SENSORS = {
     "sms_inbox": ("SMS inbox", "SMS-Posteingang"),
 }
 BINARY = {
-    "wan_connected": ("Mobile connection", "Mobilfunkverbindung"),
+    "wan_connected": ("Internet connection", "Internetverbindung"),
     "nr_connected": ("5G active", "5G aktiv"),
     "roaming": ("Roaming allowed", "Roaming erlaubt"),
     "sim_ready": ("SIM problem", "SIM-Problem"),
@@ -74,6 +83,15 @@ BINARY = {
     "cell_lock": ("LTE cell lock", "LTE Zell-Lock"),
     "nr_cell_lock": ("5G cell lock", "5G Zell-Lock"),
     "ip_passthrough": ("IP passthrough", "IP-Passthrough"),
+}
+WAN_TYPES = {
+    "cell": ("Cellular", "Mobilfunk"),
+    "dsl": ("DSL", "DSL"),
+    "eth": ("Ethernet", "Ethernet"),
+    "pon": ("Fiber (PON)", "Glasfaser (PON)"),
+    "atm": ("DSL (ATM)", "DSL (ATM)"),
+    "ptm": ("DSL (PTM)", "DSL (PTM)"),
+    "usb": ("USB modem", "USB-Modem"),
 }
 SIM_STATES = {
     "ready": ("Ready", "Bereit"),
@@ -223,6 +241,9 @@ SERVICES = {
 }
 
 
+STATE_MAPS = {"sim_status": SIM_STATES, "wan_type": WAN_TYPES}
+
+
 def build(lang: int) -> dict:
     i = lang  # 0 = en, 1 = de
     en = i == 0
@@ -241,6 +262,11 @@ def build(lang: int) -> dict:
         "cannot_connect": "Failed to connect" if en else "Verbindung fehlgeschlagen",
         "invalid_auth": "Invalid authentication" if en else "Ungültige Anmeldedaten",
         "unknown": "Unexpected error" if en else "Unerwarteter Fehler",
+        "session_busy": (
+            "The router reports that this user is already logged in. Log out of the router's web interface (or wait about 5 minutes) and try again."
+            if en
+            else "Der Router meldet, dass dieser Benutzer bereits angemeldet ist. Melde dich von der Weboberfläche des Routers ab (oder warte etwa 5 Minuten) und versuche es erneut."
+        ),
     }
     services = {}
     for name, (title, desc, fields) in SERVICES.items():
@@ -315,7 +341,7 @@ def build(lang: int) -> dict:
         },
         "entity": {
             "sensor": {
-                k: {"name": v[i], **({"state": {s: t[i] for s, t in SIM_STATES.items()}} if k == "sim_status" else {})}
+                k: {"name": v[i], **({"state": {s: t[i] for s, t in STATE_MAPS[k].items()}} if k in STATE_MAPS else {})}
                 for k, v in SENSORS.items()
             },
             "binary_sensor": {k: {"name": v[i]} for k, v in BINARY.items()},

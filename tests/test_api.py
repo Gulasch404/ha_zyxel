@@ -17,6 +17,7 @@ from custom_components.zyxel_router.api import (
     ZyxelApiError,
     ZyxelAuthError,
     ZyxelClient,
+    ZyxelSessionBusyError,
     _aes_decrypt,
     _aes_encrypt,
 )
@@ -41,6 +42,7 @@ class SimRouter:
         self.logged_in = False
         self.puts: list[dict] = []
         self.expire_once = False
+        self.duplicate = False
 
     def pem(self) -> str:
         return (
@@ -69,6 +71,10 @@ class SimRouter:
         password = base64.b64decode(payload["Input_Passwd"]).decode()
         if payload["Input_Account"] != "admin" or password != TEST_PASSWORD:
             return web.json_response({"result": "Invalid"}, status=401)
+        if self.duplicate:
+            resp = self.encrypt({"result": "Duplicated login"})
+            resp.set_status(401)
+            return resp
         self.logged_in = True
         return self.encrypt({"result": "ZCFG_SUCCESS", "sessionkey": self.session_key})
 
@@ -140,6 +146,30 @@ async def test_invalid_auth(sim) -> None:
     client = _client(test_client, password="wrong")
     try:
         with pytest.raises(ZyxelAuthError):
+            await client.login()
+    finally:
+        await client.close()
+
+
+def test_aes_zero_padding_fallback() -> None:
+    """Some firmwares pad with zero bytes instead of PKCS7."""
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+    key = base64.b64encode(b"k" * 32).decode()
+    iv = base64.b64encode(b"i" * 32).decode()
+    plain = b'{"result": "ZCFG_SUCCESS"}'
+    padded = plain + bytes(16 - len(plain) % 16)
+    enc = Cipher(algorithms.AES(b"k" * 32), modes.CBC(b"i" * 16)).encryptor()
+    content = base64.b64encode(enc.update(padded) + enc.finalize()).decode()
+    assert json.loads(_aes_decrypt(content, key, iv)) == {"result": "ZCFG_SUCCESS"}
+
+
+async def test_duplicated_login_is_not_auth_error(sim) -> None:
+    router, server = sim
+    router.duplicate = True
+    client = _client(server)
+    try:
+        with pytest.raises(ZyxelSessionBusyError):
             await client.login()
     finally:
         await client.close()

@@ -17,6 +17,14 @@ from .entity import ZyxelEntity
 PARALLEL_UPDATES = 1
 
 
+def _wlan_label(wlan: dict[str, Any], position: int) -> str:
+    """'2.4GHz' for main SSIDs, '2.4GHz Guest-SSID' for additional ones."""
+    band = wlan.get("band") or str(position + 1)
+    if wlan.get("MainSSID", True):
+        return band
+    return f"{band} {wlan.get('SSID') or wlan.get('Index')}"
+
+
 def build_wlan_payload(obj: dict[str, Any], index: int, enable: bool) -> dict[str, Any]:
     """Build the wlan PUT payload like the web GUI does (keeps SSID/PSK/security)."""
     sec = obj.get("SecurityMode")
@@ -47,7 +55,7 @@ async def async_setup_entry(
     entities: list[SwitchEntity] = []
     if FEATURE_WLAN in coordinator.data.features:
         entities.extend(
-            ZyxelWlanSwitch(coordinator, int(w.get("Index", i + 1)), w.get("band"))
+            ZyxelWlanSwitch(coordinator, int(w.get("Index", i + 1)), _wlan_label(w, i))
             for i, w in enumerate(coordinator.data.wlan)
         )
     if FEATURE_CELLULAR in coordinator.data.features and coordinator.allow_cellular_changes:
