@@ -1,14 +1,21 @@
 {
   "domain": "zyxel_router",
   "name": "Zyxel Router",
-  "codeowners": ["@Gulasch404"],
+  "categories": [
+    "computers_network.routers_network"
+  ],
+  "codeowners": [
+    "@Gulasch404"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/Gulasch404/ha_zyxel",
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Gulasch404/ha_zyxel/issues",
-  "loggers": ["custom_components.zyxel_router"],
+  "loggers": [
+    "custom_components.zyxel_router"
+  ],
   "requirements": [],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }

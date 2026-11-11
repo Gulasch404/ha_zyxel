@@ -1,6 +1,6 @@
 # Zyxel Router for Home Assistant
 
-[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Gulasch404&repository=ha_zyxel&category=integration)
+[![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=Gulasch404&repository=ha_zyxel&category=integration)
 
 Monitor and control Zyxel 5G/LTE routers locally from Home Assistant: signal quality, cells and
 bands, throughput, temperatures, GPS position and more. No cloud involved.
@@ -17,11 +17,14 @@ Running a different model? Please open an issue and attach the diagnostics file 
 
 ## Installation
 
-### HACS (recommended)
+### Marketplace / HACS (recommended)
 
-1. Click the button above, or in HACS open ⋮ → **Custom repositories**, add
-   `https://github.com/Gulasch404/ha_zyxel` with type **Integration**.
-2. Download **Zyxel Router** and restart Home Assistant.
+1. Click the button above. Or add the repository manually:
+   - Home Assistant 2026.11 and newer: **Settings → Marketplace** → ⋮ → **Custom repositories**
+   - Older versions with HACS: HACS → ⋮ → **Custom repositories**
+
+   Repository `https://github.com/Gulasch404/ha_zyxel`, type **Integration**.
+2. Download **Zyxel Router**. With HACS, restart Home Assistant afterwards.
 
 ### Manual
 
