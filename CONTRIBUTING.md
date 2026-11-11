@@ -72,7 +72,9 @@ docker run --rm -v "${PWD}:/src:ro" zyxel-ha-test:latest bash -c `
 
 ## Releases
 
-1. Bump `version` in `custom_components/zyxel_router/manifest.json`.
-2. Commit, then tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-3. The release workflow checks that the tag matches the manifest version and publishes a GitHub
-   release.
+1. Bump `version` in `custom_components/zyxel_router/manifest.json` and `pyproject.toml`.
+2. Add a `## [X.Y.Z] - YYYY-MM-DD` section to `CHANGELOG.md` (Added / Changed / Fixed, written for
+   users, one line per entry) and the compare link at the bottom.
+3. Commit, then tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. The release workflow checks that the tag matches the manifest version and publishes a GitHub
+   release with the changelog section as release notes. It fails if the section is missing.
