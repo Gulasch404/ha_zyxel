@@ -1,0 +1,92 @@
+{
+ "result": "ZCFG_SUCCESS",
+ "ReplyMsg": "X_ZYXEL_ConnectionType",
+ "ReplyMsgMultiLang": "",
+ "Object": [
+  {
+   "wanInfo": {
+    "wanStatus": 1,
+    "wanIfaceExist": 1,
+    "wanType": "ipv4"
+   },
+   "lanhosts": [
+    {
+     "Alias": "",
+     "PhysAddress": "02:11:22:33:44:55",
+     "X_ZYXEL_PhysAddressOUI": "02:11:22",
+     "IPAddress": "203.0.113.10",
+     "IPAddress6": "",
+     "IPLinkLocalAddress6": "N/A",
+     "AddressSource": "Static",
+     "DHCPClient": "",
+     "LeaseTimeRemaining": 0,
+     "AssociatedDevice": "",
+     "Layer1Interface": "Device.Ethernet.Interface.1",
+     "Layer3Interface": "Device.IP.Interface.6",
+     "VendorClassID": "",
+     "ClientID": "",
+     "UserClassID": "",
+     "HostName": "Unknown",
+     "Active": true,
+     "X_ZYXEL_DeleteLease": false,
+     "X_ZYXEL_ConnectionType": "Ethernet",
+     "X_ZYXEL_ConnectedAP": "",
+     "X_ZYXEL_HostType": "",
+     "X_ZYXEL_CapabilityType": "",
+     "X_ZYXEL_PhyRate": 1000,
+     "X_ZYXEL_WiFiStatus": false,
+     "X_ZYXEL_SignalStrength": 0,
+     "X_ZYXEL_SNR": 0,
+     "X_ZYXEL_RSSI": 0,
+     "X_ZYXEL_SoftwareVersion": "",
+     "X_ZYXEL_LastUpdate": 1794411519,
+     "X_ZYXEL_Address6Source": "",
+     "X_ZYXEL_DHCP6Client": "",
+     "X_ZYXEL_BytesSent": 0,
+     "X_ZYXEL_BytesReceived": 0,
+     "IPv4AddressNumberOfEntries": 0,
+     "IPv6AddressNumberOfEntries": 0,
+     "ClientDuid": "",
+     "ExpireTime": "",
+     "SupportedFrequencyBands": "",
+     "WiFiname": "",
+     "DeviceIcon": "",
+     "Internet_Blocking_Enable": false,
+     "DeviceName": "Unknown",
+     "curHostName": "",
+     "dhcp4PoolExist": true,
+     "dhcp4PoolIid": [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "dhcp4StaticAddrExist": false,
+     "dhcp4StaticAddrIid": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "dhcp4StaticAddrEnable": false,
+     "dhcp4StaticAddr": "",
+     "dhcp4StaticAddrNum": 0,
+     "dhcp4StaticAddrUsedByOtherHost": false,
+     "staticIP": "",
+     "icon": "ipc"
+    }
+   ],
+   "STBVendorID": {
+    "STBVendorID1": "",
+    "STBVendorID2": "",
+    "STBVendorID3": "",
+    "STBVendorID4": "",
+    "STBVendorID5": ""
+   }
+  }
+ ]
+}

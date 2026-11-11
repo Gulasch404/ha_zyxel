@@ -1,0 +1,22 @@
+{
+ "result": "ZCFG_SUCCESS",
+ "ReplyMsg": "GNSS_DisplayFormat",
+ "ReplyMsgMultiLang": "",
+ "Object": [
+  {
+   "GNSS_Enable": true,
+   "GNSS_ScanOnBoot": false,
+   "GNSS_DisplayFormat": 2,
+   "GNSS_ScanStatus": -1,
+   "GNSS_Latitude": 48208176,
+   "GNSS_Longitude": 16373819,
+   "GNSS_HDOP": 6,
+   "GNSS_Elevation": 4254,
+   "GNSS_PositioningMode": 3,
+   "GNSS_CourseOverGround": 0,
+   "GNSS_SpeedOverGround": 0,
+   "GNSS_LastFixTime": "2026-01-01T12:00:00Z",
+   "GNSS_NumberOfSatellites": 22
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+  "domain": "zyxel_router",
+  "name": "Zyxel Router",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/OWNER/ha_zyxel",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/OWNER/ha_zyxel/issues",
+  "loggers": ["custom_components.zyxel_router"],
+  "requirements": [],
+  "version": "0.1.0"
+}

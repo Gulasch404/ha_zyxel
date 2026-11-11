@@ -1,0 +1,15 @@
+{
+ "result": "ZCFG_SUCCESS",
+ "ReplyMsg": "SCS",
+ "ReplyMsgMultiLang": "",
+ "Object": [
+  {
+   "PCI_Enable": false,
+   "RFCN": 0,
+   "BAND": 0,
+   "PCI": -1,
+   "SCS": 15,
+   "Status": ""
+  }
+ ]
+}

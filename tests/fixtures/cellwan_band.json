@@ -1,0 +1,17 @@
+{
+ "result": "ZCFG_SUCCESS",
+ "ReplyMsg": "INTF_Preferred_Bands",
+ "ReplyMsgMultiLang": "",
+ "Object": [
+  {
+   "INTF_Supported_Access_Technologies": "NR5G-NSA,NR5G,LTE,UMTS",
+   "INTF_Preferred_Access_Technology": "Auto",
+   "INTF_Current_Access_Technology": "NR-NSA EN-DC",
+   "INTF_Supported_Service_Domain": "PS only,Combine",
+   "INTF_Preferred_Service_Domain": "Combine",
+   "INTF_Supported_Bands": "LTE_BC1,LTE_BC3,LTE_BC5,LTE_BC7,LTE_BC8,LTE_BC18,LTE_BC19,LTE_BC20,LTE_BC26,LTE_BC28,LTE_BC32,LTE_BC34,LTE_BC38,LTE_BC39,LTE_BC40,LTE_BC41,LTE_BC42,LTE_BC43,NR_N1,NR_N3,NR_N5,NR_N7,NR_N8,NR_N20,NR_N28,NR_N38,NR_N40,NR_N41,NR_N71,NR_N77,NR_N78",
+   "INTF_Preferred_Bands": "Auto",
+   "INTF_Current_Band": "LTE_BC3"
+  }
+ ]
+}

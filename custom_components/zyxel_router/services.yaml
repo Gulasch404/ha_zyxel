@@ -1,0 +1,143 @@
+set_preferred_bands:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    bands:
+      required: true
+      example: '["B3", "B1", "n78"]'
+      selector:
+        object:
+
+set_network_mode:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    mode:
+      required: true
+      selector:
+        select:
+          options:
+            - "Auto"
+            - "NR5G-NSA"
+            - "NR5G"
+            - "LTE"
+            - "UMTS"
+
+set_cell_lock:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    cells:
+      required: true
+      example: '[{"pci": 400, "earfcn": 1300}]'
+      selector:
+        object:
+
+clear_cell_lock:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+
+set_nr_cell_lock:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    pci:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 1007
+          mode: box
+    arfcn:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 3279165
+          mode: box
+    band:
+      required: true
+      example: 78
+      selector:
+        number:
+          min: 1
+          max: 512
+          mode: box
+    scs:
+      default: 30
+      selector:
+        select:
+          options:
+            - "15"
+            - "30"
+            - "60"
+            - "120"
+
+clear_nr_cell_lock:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+
+delete_sms:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    index:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 999
+          mode: box
+
+dal_get:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    oid:
+      required: true
+      example: cellwan_status
+      selector:
+        text:
+
+dal_set:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: zyxel_router
+    oid:
+      required: true
+      selector:
+        text:
+    method:
+      default: PUT
+      selector:
+        select:
+          options:
+            - PUT
+            - POST
+            - DELETE
+    payload:
+      selector:
+        object:
+    params:
+      selector:
+        object:

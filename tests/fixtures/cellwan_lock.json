@@ -1,0 +1,13 @@
+{
+ "result": "ZCFG_SUCCESS",
+ "ReplyMsg": "RFCN",
+ "ReplyMsgMultiLang": "",
+ "Object": [
+  {
+   "LK_Enable": false,
+   "LK_ConnectionMode": "4g",
+   "LK_NumberOfPCILocked": 0,
+   "LK_LockedList": []
+  }
+ ]
+}

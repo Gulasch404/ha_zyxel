@@ -1,0 +1,472 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Zyxel Router",
+        "description": "Verbindung zu einem Zyxel-Router (NR/FWA/VMG/EX-Serie).",
+        "data": {
+          "host": "Host",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "verify_ssl": "SSL-Zertifikat prüfen"
+        },
+        "data_description": {
+          "host": "URL der Weboberfläche, z. B. http://192.168.1.1 (HTTPS geht auch)."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Erneut anmelden",
+        "data": {
+          "username": "Benutzername",
+          "password": "Passwort"
+        }
+      },
+      "reconfigure": {
+        "title": "Neu konfigurieren",
+        "data": {
+          "host": "Host",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "verify_ssl": "SSL-Zertifikat prüfen"
+        },
+        "data_description": {
+          "host": "URL der Weboberfläche, z. B. http://192.168.1.1 (HTTPS geht auch)."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen",
+      "invalid_auth": "Ungültige Anmeldedaten",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits eingerichtet",
+      "reauth_successful": "Erneute Anmeldung erfolgreich",
+      "reconfigure_successful": "Neukonfiguration erfolgreich",
+      "unique_id_mismatch": "Das ist ein anderes Gerät"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Optionen",
+        "data": {
+          "scan_interval": "Schnelles Abfrageintervall (s)",
+          "slow_interval": "Langsames Abfrageintervall (s)",
+          "allow_cellular_changes": "Mobilfunk-Änderungen erlauben",
+          "revert_timeout": "Auto-Revert-Zeitlimit (s)",
+          "allow_raw_writes": "Rohe DAL-Schreibzugriffe erlauben (Experte)"
+        },
+        "data_description": {
+          "scan_interval": "Signal und Traffic.",
+          "slow_interval": "Geräteinfo, SIM, Bänder, Locks, WLAN, GNSS, SMS.",
+          "allow_cellular_changes": "Aktiviert Netzmodus, Band-/Zell-Lock und Roaming. Jede Änderung wird überwacht und automatisch zurückgenommen, wenn die Verbindung nicht wiederkommt.",
+          "revert_timeout": "Zeit, in der die Verbindung nach einer Mobilfunk-Änderung wiederkommen muss, bevor die vorherige Einstellung wiederhergestellt wird.",
+          "allow_raw_writes": "Erlaubt die Aktion dal_set. Nicht durch den Watchdog geschützt!"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "access_technology": {
+        "name": "Zugangstechnologie"
+      },
+      "operator": {
+        "name": "Netzbetreiber"
+      },
+      "band": {
+        "name": "Primärband"
+      },
+      "ca_bands": {
+        "name": "Aggregierte Bänder"
+      },
+      "carrier_count": {
+        "name": "Träger (CA)"
+      },
+      "total_bandwidth": {
+        "name": "Gesamte Downlink-Bandbreite"
+      },
+      "rssi": {
+        "name": "RSSI"
+      },
+      "rsrp": {
+        "name": "RSRP"
+      },
+      "rsrq": {
+        "name": "RSRQ"
+      },
+      "sinr": {
+        "name": "SINR"
+      },
+      "cqi": {
+        "name": "CQI"
+      },
+      "mcs": {
+        "name": "MCS"
+      },
+      "ri": {
+        "name": "Rank Indicator"
+      },
+      "cell_id": {
+        "name": "Zell-ID"
+      },
+      "enb_id": {
+        "name": "eNB-ID"
+      },
+      "pci": {
+        "name": "PCI"
+      },
+      "earfcn": {
+        "name": "EARFCN"
+      },
+      "tac": {
+        "name": "TAC"
+      },
+      "dl_bandwidth": {
+        "name": "Primäre Downlink-Bandbreite"
+      },
+      "ul_bandwidth": {
+        "name": "Primäre Uplink-Bandbreite"
+      },
+      "nr_band": {
+        "name": "5G-Band"
+      },
+      "nr_rsrp": {
+        "name": "5G RSRP"
+      },
+      "nr_rsrq": {
+        "name": "5G RSRQ"
+      },
+      "nr_sinr": {
+        "name": "5G SINR"
+      },
+      "nr_pci": {
+        "name": "5G PCI"
+      },
+      "nr_arfcn": {
+        "name": "5G ARFCN"
+      },
+      "sim_status": {
+        "name": "SIM-Status",
+        "state": {
+          "ready": "Bereit",
+          "not_inserted": "Nicht eingelegt",
+          "pin_required": "PIN erforderlich",
+          "puk_required": "PUK erforderlich",
+          "error": "Fehler"
+        }
+      },
+      "imei": {
+        "name": "IMEI"
+      },
+      "imsi": {
+        "name": "IMSI"
+      },
+      "iccid": {
+        "name": "ICCID"
+      },
+      "preferred_bands": {
+        "name": "Bevorzugte Bänder"
+      },
+      "modem_firmware": {
+        "name": "Modem-Firmware"
+      },
+      "wan_ipv4": {
+        "name": "WAN IPv4"
+      },
+      "wan_ipv6": {
+        "name": "WAN IPv6"
+      },
+      "download_rate": {
+        "name": "Download-Rate"
+      },
+      "upload_rate": {
+        "name": "Upload-Rate"
+      },
+      "wan_received": {
+        "name": "WAN empfangen"
+      },
+      "wan_sent": {
+        "name": "WAN gesendet"
+      },
+      "wan_connected_since": {
+        "name": "WAN verbunden seit"
+      },
+      "last_boot": {
+        "name": "Letzter Neustart"
+      },
+      "clients": {
+        "name": "Verbundene Geräte"
+      },
+      "wifi_clients": {
+        "name": "WLAN-Geräte"
+      },
+      "lan_speed": {
+        "name": "LAN-Verbindungsgeschwindigkeit"
+      },
+      "apn": {
+        "name": "APN"
+      },
+      "temperature_cpu": {
+        "name": "CPU-Temperatur"
+      },
+      "temperature_modem": {
+        "name": "Modem-Temperatur"
+      },
+      "temperature_ambient": {
+        "name": "Umgebungstemperatur"
+      },
+      "gnss_satellites": {
+        "name": "GNSS-Satelliten"
+      },
+      "gnss_altitude": {
+        "name": "GNSS-Höhe"
+      },
+      "gnss_last_fix": {
+        "name": "GNSS letzte Positionsbestimmung"
+      },
+      "sms_inbox": {
+        "name": "SMS-Posteingang"
+      }
+    },
+    "binary_sensor": {
+      "wan_connected": {
+        "name": "Mobilfunkverbindung"
+      },
+      "nr_connected": {
+        "name": "5G aktiv"
+      },
+      "roaming": {
+        "name": "Roaming erlaubt"
+      },
+      "sim_ready": {
+        "name": "SIM-Problem"
+      },
+      "band_lock": {
+        "name": "Band-Lock"
+      },
+      "cell_lock": {
+        "name": "LTE Zell-Lock"
+      },
+      "nr_cell_lock": {
+        "name": "5G Zell-Lock"
+      },
+      "ip_passthrough": {
+        "name": "IP-Passthrough"
+      }
+    },
+    "switch": {
+      "wlan": {
+        "name": "WLAN {band}"
+      },
+      "roaming": {
+        "name": "Daten-Roaming"
+      }
+    },
+    "select": {
+      "network_mode": {
+        "name": "Netzmodus",
+        "state": {
+          "auto": "Automatisch",
+          "nr5g_nsa": "5G NSA (mit LTE)",
+          "nr5g_sa": "Nur 5G SA",
+          "lte": "Nur LTE",
+          "umts": "Nur 3G"
+        }
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Aktualisieren"
+      }
+    },
+    "device_tracker": {
+      "gnss": {
+        "name": "GNSS-Position"
+      }
+    }
+  },
+  "exceptions": {
+    "cellular_changes_disabled": {
+      "message": "Mobilfunk-Änderungen sind deaktiviert. Aktiviere sie zuerst in den Optionen der Integration."
+    },
+    "change_in_progress": {
+      "message": "Eine andere Mobilfunk-Änderung wird noch überprüft. Bitte warten."
+    },
+    "invalid_band": {
+      "message": "Band {band} wird nicht unterstützt. Unterstützt: {supported}"
+    },
+    "invalid_mode": {
+      "message": "Modus {mode} wird nicht unterstützt. Unterstützt: {supported}"
+    },
+    "no_lte_anchor": {
+      "message": "Die Bandliste enthält kein LTE-Band. Ohne LTE-Anker kann 5G NSA nicht verbinden. Zuerst auf 5G SA umstellen oder ein LTE-Band ergänzen."
+    },
+    "cell_count": {
+      "message": "Es sind 1 bis 5 Zellen erforderlich."
+    },
+    "invalid_cell": {
+      "message": "Ungültige PCI oder EARFCN."
+    },
+    "invalid_scs": {
+      "message": "SCS muss 15, 30, 60 oder 120 kHz sein."
+    },
+    "unknown_device": {
+      "message": "Unbekanntes Gerät."
+    },
+    "device_required": {
+      "message": "Bitte ein Zyxel-Gerät auswählen."
+    },
+    "sms_not_supported": {
+      "message": "Dieses Gerät unterstützt keine SMS."
+    },
+    "raw_writes_disabled": {
+      "message": "Rohe DAL-Schreibzugriffe sind in den Optionen deaktiviert."
+    }
+  },
+  "services": {
+    "set_preferred_bands": {
+      "name": "Bevorzugte Bänder setzen",
+      "description": "Beschränkt das Modem auf die angegebenen Bänder. Durch den Auto-Revert-Watchdog geschützt.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "bands": {
+          "name": "Bänder",
+          "description": "Liste wie [\"B3\",\"B1\",\"n78\"] oder [\"auto\"] für automatisch."
+        }
+      }
+    },
+    "set_network_mode": {
+      "name": "Netzmodus setzen",
+      "description": "Setzt die bevorzugte Zugangstechnologie (Watchdog-geschützt).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "mode": {
+          "name": "Modus",
+          "description": "Zugangstechnologie."
+        }
+      }
+    },
+    "set_cell_lock": {
+      "name": "LTE Zell-Lock setzen",
+      "description": "Sperrt LTE auf bis zu 5 Zellen (Watchdog-geschützt).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "cells": {
+          "name": "Zellen",
+          "description": "Liste wie [{\"pci\": 400, \"earfcn\": 1300}]."
+        }
+      }
+    },
+    "clear_cell_lock": {
+      "name": "LTE Zell-Lock aufheben",
+      "description": "Deaktiviert den LTE Zell-Lock.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        }
+      }
+    },
+    "set_nr_cell_lock": {
+      "name": "5G SA Zell-Lock setzen",
+      "description": "Sperrt auf eine 5G-Zelle. Nur im 5G-SA-Modus wirksam (Watchdog-geschützt).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "pci": {
+          "name": "PCI",
+          "description": "Physikalische Zell-ID."
+        },
+        "arfcn": {
+          "name": "ARFCN",
+          "description": "NR-ARFCN."
+        },
+        "band": {
+          "name": "Band",
+          "description": "NR-Bandnummer, z. B. 78."
+        },
+        "scs": {
+          "name": "SCS",
+          "description": "Unterträgerabstand in kHz."
+        }
+      }
+    },
+    "clear_nr_cell_lock": {
+      "name": "5G Zell-Lock aufheben",
+      "description": "Deaktiviert den 5G Zell-Lock.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        }
+      }
+    },
+    "delete_sms": {
+      "name": "SMS löschen",
+      "description": "Löscht eine SMS aus dem Posteingang.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "index": {
+          "name": "Index",
+          "description": "Index der Nachricht."
+        }
+      }
+    },
+    "dal_get": {
+      "name": "DAL-Objekt lesen",
+      "description": "Liest eine beliebige DAL-OID vom Router und gibt sie zurück.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "oid": {
+          "name": "OID",
+          "description": "z. B. cellwan_status, status, wan"
+        }
+      }
+    },
+    "dal_set": {
+      "name": "DAL-Objekt schreiben (Experte)",
+      "description": "Schreibt eine beliebige DAL-OID. NICHT durch den Watchdog geschützt! Muss in den Optionen aktiviert sein.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Zyxel-Gerät (optional bei nur einem Router)."
+        },
+        "oid": {
+          "name": "OID",
+          "description": "DAL-Objekt-ID."
+        },
+        "method": {
+          "name": "Methode",
+          "description": "HTTP-Methode."
+        },
+        "payload": {
+          "name": "Payload",
+          "description": "Zu sendendes JSON-Objekt."
+        },
+        "params": {
+          "name": "Parameter",
+          "description": "Zusätzliche Query-Parameter (z. B. Index)."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+ "result": "ZCFG_SUCCESS",
+ "ReplyMsg": "DO_Module_Reset",
+ "ReplyMsgMultiLang": "",
+ "Object": [
+  {
+   "CELL_Roaming_Enable": false,
+   "CELL_Disable_UMTS": false,
+   "Refresh_Interval": 10,
+   "DO_Module_Reset": true,
+   "CELL_Network_Monitor_Enable": false,
+   "ProxyARP_Enable": false,
+   "CELL_FQ_CODEL_Enable": false
+  }
+ ]
+}
