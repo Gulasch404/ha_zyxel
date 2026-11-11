@@ -127,7 +127,23 @@ EXCEPTIONS = {
         "Rohe DAL-Schreibzugriffe sind in den Optionen deaktiviert.",
     ),
 }
-DEVICE_FIELD = ("Device", "Gerät", "Zyxel device (optional with only one router).", "Zyxel-Gerät (optional bei nur einem Router).")
+ISSUES = {
+    "cellular_change_reverted": (
+        ("Zyxel: cellular change reverted", "Zyxel: Mobilfunk-Änderung zurückgenommen"),
+        (
+            "After the change **{change}** the cellular connection did not come back within {timeout} seconds. The previous setting has been restored automatically. This message disappears after the next successful change.",
+            "Nach der Änderung **{change}** kam die Mobilfunkverbindung nicht innerhalb von {timeout} Sekunden zurück. Die vorherige Einstellung wurde automatisch wiederhergestellt. Diese Meldung verschwindet nach der nächsten erfolgreichen Änderung.",
+        ),
+    ),
+    "cellular_revert_failed": (
+        ("Zyxel: restoring cellular settings failed", "Zyxel: Wiederherstellung der Mobilfunk-Einstellungen fehlgeschlagen"),
+        (
+            "After the change **{change}** the cellular connection did not come back within {timeout} seconds, and restoring the previous setting failed. Check the router web interface (via LAN) and reset band/cell lock and network mode to automatic.",
+            "Nach der Änderung **{change}** kam die Mobilfunkverbindung nicht innerhalb von {timeout} Sekunden zurück, und die Wiederherstellung der vorherigen Einstellung ist fehlgeschlagen. Prüfe die Weboberfläche des Routers (über LAN) und setze Band-/Zell-Lock und Netzmodus auf automatisch zurück.",
+        ),
+    ),
+}
+DEVICE_FIELD =("Device", "Gerät", "Zyxel device (optional with only one router).", "Zyxel-Gerät (optional bei nur einem Router).")
 SERVICES = {
     "set_preferred_bands": (
         ("Set preferred bands", "Bevorzugte Bänder setzen"),
@@ -317,6 +333,7 @@ def build(lang: int) -> dict:
             "device_tracker": {"gnss": {"name": "GNSS position" if en else "GNSS-Position"}},
         },
         "exceptions": {k: {"message": v[i]} for k, v in EXCEPTIONS.items()},
+        "issues": {k: {"title": v[0][i], "description": v[1][i]} for k, v in ISSUES.items()},
         "services": services,
     }
 

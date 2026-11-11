@@ -56,7 +56,7 @@ async def set_network_mode(coordinator: ZyxelCoordinator, mode: str) -> None:
     async def restore(prev: dict[str, Any]) -> None:
         await client.dal_put("cellwan_band", prev)
 
-    await coordinator.async_cellular_change(f"Netzmodus → {mode}", snapshot, apply, restore)
+    await coordinator.async_cellular_change(f"Network mode → {mode}", snapshot, apply, restore)
 
 
 async def set_preferred_bands(coordinator: ZyxelCoordinator, bands: list[str]) -> None:
@@ -86,7 +86,7 @@ async def set_preferred_bands(coordinator: ZyxelCoordinator, bands: list[str]) -
     async def restore(prev: dict[str, Any]) -> None:
         await client.dal_put("cellwan_band", prev)
 
-    await coordinator.async_cellular_change(f"Bänder → {value}", snapshot, apply, restore)
+    await coordinator.async_cellular_change(f"Bands → {value}", snapshot, apply, restore)
 
 
 async def _write_cell_lock(client: ZyxelClient, enable: bool, cells: list[dict[str, int]]) -> None:
@@ -131,7 +131,7 @@ async def set_cell_lock(coordinator: ZyxelCoordinator, cells: list[dict[str, Any
         )
 
     desc = ", ".join(f"PCI {c['PhyCellID']}/EARFCN {c['RFCN']}" for c in parsed)
-    await coordinator.async_cellular_change(f"LTE Zell-Lock → {desc}", snapshot, apply, restore)
+    await coordinator.async_cellular_change(f"LTE cell lock → {desc}", snapshot, apply, restore)
 
 
 async def clear_cell_lock(coordinator: ZyxelCoordinator) -> None:
@@ -151,7 +151,7 @@ async def clear_cell_lock(coordinator: ZyxelCoordinator) -> None:
             client, bool(prev.get("LK_Enable")), list(prev.get("LK_LockedList") or [])
         )
 
-    await coordinator.async_cellular_change("LTE Zell-Lock aus", snapshot, apply, restore)
+    await coordinator.async_cellular_change("LTE cell lock off", snapshot, apply, restore)
 
 
 async def set_nr_cell_lock(
@@ -177,7 +177,7 @@ async def set_nr_cell_lock(
         await client.dal_put("cellwan_nr_lock", prev)
 
     await coordinator.async_cellular_change(
-        f"NR Zell-Lock → PCI {pci}/ARFCN {arfcn}/n{band}", snapshot, apply, restore
+        f"NR cell lock → PCI {pci}/ARFCN {arfcn}/n{band}", snapshot, apply, restore
     )
 
 
@@ -199,7 +199,7 @@ async def clear_nr_cell_lock(coordinator: ZyxelCoordinator) -> None:
         prev.pop("Status", None)
         await client.dal_put("cellwan_nr_lock", prev)
 
-    await coordinator.async_cellular_change("NR Zell-Lock aus", snapshot, apply, restore)
+    await coordinator.async_cellular_change("NR cell lock off", snapshot, apply, restore)
 
 
 async def set_roaming(coordinator: ZyxelCoordinator, enable: bool) -> None:
@@ -218,5 +218,5 @@ async def set_roaming(coordinator: ZyxelCoordinator, enable: bool) -> None:
         await client.dal_put("cellwan", prev)
 
     await coordinator.async_cellular_change(
-        f"Roaming → {'an' if enable else 'aus'}", snapshot, apply, restore
+        f"Roaming → {'on' if enable else 'off'}", snapshot, apply, restore
     )

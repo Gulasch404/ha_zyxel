@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events
 
 from custom_components.zyxel_router import coordinator as coord_mod
@@ -107,6 +108,13 @@ async def test_band_lock_reverted(
     puts = [w[2]["INTF_Preferred_Bands"] for w in router.writes if w[1] == "cellwan_band"]
     assert puts == ["LTE_BC20", "Auto"]  # applied, then restored
     assert len(events) == 1
+    assert events[0].data["reverted"] is True
+    issue = ir.async_get(hass).async_get_issue(
+        DOMAIN, f"cellular_change_reverted_{config_entry.entry_id}"
+    )
+    assert issue is not None
+    assert issue.translation_key == "cellular_change_reverted"
+    assert issue.translation_placeholders["change"] == "Bands → LTE_BC20"
 
 
 async def test_invalid_band_and_anchor(

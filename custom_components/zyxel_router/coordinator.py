@@ -10,11 +10,11 @@ from collections.abc import Awaitable, Callable
 from datetime import timedelta
 from typing import Any
 
-from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import ZyxelApiError, ZyxelAuthError, ZyxelClient, ZyxelError
@@ -202,6 +202,10 @@ class ZyxelCoordinator(DataUpdateCoordinator[ZyxelData]):
                 f"{DOMAIN} watchdog {description}",
             )
 
+    @property
+    def _revert_issue_id(self) -> str:
+        return f"cellular_change_reverted_{self.config_entry.entry_id}"
+
     async def _connection_ok(self) -> bool:
         try:
             cell = await self.client.dal_get_one("cellwan_status")
@@ -224,6 +228,7 @@ class ZyxelCoordinator(DataUpdateCoordinator[ZyxelData]):
                     stable += 1
                     if stable >= WATCHDOG_STABLE_CHECKS:
                         _LOGGER.info("Cellular change '%s' confirmed, connection up", description)
+                        ir.async_delete_issue(self.hass, DOMAIN, self._revert_issue_id)
                         return
                 else:
                     stable = 0
@@ -232,24 +237,34 @@ class ZyxelCoordinator(DataUpdateCoordinator[ZyxelData]):
             _LOGGER.error(
                 "No cellular connection %ss after '%s' - reverting", self.revert_timeout, description
             )
+            reverted = False
             for attempt in range(3):
                 try:
                     await restore(previous)
+                    reverted = True
                     break
                 except ZyxelError as err:
                     _LOGGER.error("Revert attempt %s failed: %s", attempt + 1, err)
                     await asyncio.sleep(10)
             self.hass.bus.async_fire(
                 EVENT_REVERTED,
-                {"entry_id": self.config_entry.entry_id, "change": description},
+                {
+                    "entry_id": self.config_entry.entry_id,
+                    "change": description,
+                    "reverted": reverted,
+                },
             )
-            persistent_notification.async_create(
+            ir.async_create_issue(
                 self.hass,
-                f"Zyxel: Nach der Änderung **{description}** kam keine Mobilfunkverbindung "
-                f"innerhalb von {self.revert_timeout}s zustande. Die vorherige Einstellung "
-                "wurde automatisch wiederhergestellt.",
-                title="Zyxel: Änderung zurückgenommen",
-                notification_id=f"{DOMAIN}_revert_{self.config_entry.entry_id}",
+                DOMAIN,
+                self._revert_issue_id,
+                is_fixable=False,
+                severity=ir.IssueSeverity.WARNING if reverted else ir.IssueSeverity.ERROR,
+                translation_key="cellular_change_reverted" if reverted else "cellular_revert_failed",
+                translation_placeholders={
+                    "change": description,
+                    "timeout": str(self.revert_timeout),
+                },
             )
         finally:
             self.watchdog_active = False

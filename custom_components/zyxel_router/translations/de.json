@@ -325,6 +325,16 @@
       "message": "Rohe DAL-Schreibzugriffe sind in den Optionen deaktiviert."
     }
   },
+  "issues": {
+    "cellular_change_reverted": {
+      "title": "Zyxel: Mobilfunk-Änderung zurückgenommen",
+      "description": "Nach der Änderung **{change}** kam die Mobilfunkverbindung nicht innerhalb von {timeout} Sekunden zurück. Die vorherige Einstellung wurde automatisch wiederhergestellt. Diese Meldung verschwindet nach der nächsten erfolgreichen Änderung."
+    },
+    "cellular_revert_failed": {
+      "title": "Zyxel: Wiederherstellung der Mobilfunk-Einstellungen fehlgeschlagen",
+      "description": "Nach der Änderung **{change}** kam die Mobilfunkverbindung nicht innerhalb von {timeout} Sekunden zurück, und die Wiederherstellung der vorherigen Einstellung ist fehlgeschlagen. Prüfe die Weboberfläche des Routers (über LAN) und setze Band-/Zell-Lock und Netzmodus auf automatisch zurück."
+    }
+  },
   "services": {
     "set_preferred_bands": {
       "name": "Bevorzugte Bänder setzen",

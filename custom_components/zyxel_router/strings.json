@@ -325,6 +325,16 @@
       "message": "Raw DAL writes are disabled in the integration options."
     }
   },
+  "issues": {
+    "cellular_change_reverted": {
+      "title": "Zyxel: cellular change reverted",
+      "description": "After the change **{change}** the cellular connection did not come back within {timeout} seconds. The previous setting has been restored automatically. This message disappears after the next successful change."
+    },
+    "cellular_revert_failed": {
+      "title": "Zyxel: restoring cellular settings failed",
+      "description": "After the change **{change}** the cellular connection did not come back within {timeout} seconds, and restoring the previous setting failed. Check the router web interface (via LAN) and reset band/cell lock and network mode to automatic."
+    }
+  },
   "services": {
     "set_preferred_bands": {
       "name": "Set preferred bands",

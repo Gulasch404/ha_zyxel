@@ -1,66 +1,140 @@
-# Zyxel Router – Home Assistant Integration
+# Zyxel Router for Home Assistant
 
-Lokale Integration für Zyxel-Router mit der Vue-basierten Weboberfläche (DAL-API), z. B. **NR7101**.
-Weitere Modelle der NR/FWA/VMG/EX-Serie sollten funktionieren. Was das jeweilige Gerät unterstützt,
-wird automatisch erkannt.
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Gulasch404&repository=ha_zyxel&category=integration)
 
-Getestet: **NR7101**, Firmware `1.00(ABUV.11)C0`, Modem `RG502QEAAAR11A03M4G`.
+Monitor and control Zyxel 5G/LTE routers locally from Home Assistant: signal quality, cells and
+bands, throughput, temperatures, GPS position and more. No cloud involved.
 
-## Funktionen
+## Supported devices
 
-**Sensoren**
-- Mobilfunk: Zugangstechnologie, Betreiber/PLMN, Primärband, aggregierte Bänder (CA) mit
-  Detail-Attributen je Träger, Anzahl Träger, gesamte Downlink-Bandbreite
-- Signal: RSSI, RSRP, RSRQ, SINR, CQI, MCS, RI (LTE) sowie RSRP/RSRQ/SINR/Band/PCI/ARFCN (5G)
-- Zelle: Cell-ID, eNB-ID, PCI, EARFCN, TAC, UL/DL-Bandbreite
-- WAN: IPv4/IPv6, DNS, Download-/Upload-Rate (wrap-sicher aus 32-Bit-Zählern berechnet),
-  Datenvolumen, verbunden seit
-- System: letzter Neustart, Temperaturen (CPU, Modem, Umgebung), LAN-Geschwindigkeit,
-  verbundene Geräte, WLAN-Geräte
-- SIM: Status, IMEI/IMSI/ICCID (standardmäßig deaktiviert), APN, bevorzugte Bänder
-- GNSS: Satelliten, Höhe, letzte Positionsbestimmung, Position als Device-Tracker
-  (standardmäßig deaktiviert)
-- SMS-Posteingang inkl. Event `zyxel_router_sms_received`, wenn das Gerät SMS unterstützt
+| Device | Status |
+| --- | --- |
+| **NR7101** (5G outdoor router) | Tested (firmware `1.00(ABUV.11)C0`) |
+| Other Zyxel NR / FWA / VMG / EX models with the same web interface | Expected to work. Available features are detected automatically. |
 
-**Binärsensoren:** Mobilfunkverbindung, 5G aktiv, Roaming erlaubt, SIM-Problem, Band-Lock,
-LTE-/5G-Zell-Lock, IP-Passthrough
+Running a different model? Please open an issue and attach the diagnostics file (see
+[Troubleshooting](#troubleshooting)).
 
-**Steuerung**
-- Neustart-Button, Aktualisieren-Button
-- WLAN an/aus
-- *(nach Freigabe)* Netzmodus (Select), Daten-Roaming (Switch)
-- *(nach Freigabe)* Aktionen `set_preferred_bands`, `set_network_mode`, `set_cell_lock`,
-  `clear_cell_lock`, `set_nr_cell_lock`, `clear_nr_cell_lock`
-- `dal_get`: liest eine beliebige DAL-OID (Antwort als Service-Response)
-- `dal_set`: schreibt eine beliebige DAL-OID (Experte, muss in den Optionen freigegeben werden)
+## Installation
 
-## Sicherheit bei Mobilfunk-Änderungen
+### HACS (recommended)
 
-Ein falscher Band- oder Zell-Lock kann einen Außen-Router dauerhaft offline nehmen. Deshalb gilt:
+1. Click the button above, or in HACS open ⋮ → **Custom repositories**, add
+   `https://github.com/Gulasch404/ha_zyxel` with type **Integration**.
+2. Download **Zyxel Router** and restart Home Assistant.
 
-1. **Alle verbindungsrelevanten Änderungen sind standardmäßig gesperrt.** Freigabe unter
-   *Einstellungen → Geräte & Dienste → Zyxel Router → Konfigurieren → Mobilfunk-Änderungen erlauben*.
-2. **Auto-Revert-Watchdog:** Vor jeder Änderung wird der aktuelle Zustand gesichert. Steht die
-   Mobilfunkverbindung (Status *Up* und WAN-IP vorhanden) nicht innerhalb des Zeitlimits
-   (Standard: 240 s) zweimal hintereinander, stellt die Integration die vorherige Einstellung
-   automatisch wieder her. Dazu kommen eine Benachrichtigung und das Event
-   `zyxel_router_cellular_change_reverted`.
-   Das funktioniert, weil HA den Router über das LAN erreicht, auch wenn die Mobilfunkverbindung
-   weg ist. **Voraussetzung:** HA läuft während des Zeitfensters weiter.
-3. Band-Listen ohne LTE-Band werden abgelehnt, solange der Modus nicht *5G SA* ist, weil 5G NSA
-   einen LTE-Anker braucht.
-4. Der Zell-Scan (QSCAN) ist bewusst nicht eingebaut, weil er die Datenverbindung unterbricht.
-5. `dal_set` ist **nicht** durch den Watchdog geschützt.
+### Manual
 
-### Beispiele
+Copy `custom_components/zyxel_router` into your `config/custom_components/` folder and restart
+Home Assistant.
+
+## Setup
+
+**Settings → Devices & services → Add integration → Zyxel Router**
+
+| Field | Description |
+| --- | --- |
+| Host | Address of the router's web interface, e.g. `http://192.168.1.1`. `https://` works too. |
+| Username / Password | The login of the router's web interface (usually `admin`). |
+| Verify SSL certificate | Leave off; the routers use a self-signed certificate. |
+
+## What you get
+
+### Sensors
+
+| Area | Entities |
+| --- | --- |
+| Connection | Access technology (e.g. 5G NSA), operator, primary band, aggregated bands (with per-carrier details), number of carriers, total bandwidth |
+| LTE signal | RSSI, RSRP, RSRQ, SINR, CQI, MCS, rank indicator |
+| 5G signal | Band, RSRP, RSRQ, SINR, PCI, ARFCN |
+| Cell | Cell ID, eNB ID, PCI, EARFCN, TAC, uplink/downlink bandwidth |
+| Internet | WAN IPv4/IPv6, download and upload rate, data received/sent, connected since |
+| Device | Last boot, CPU/modem/ambient temperature, LAN link speed, connected clients, WiFi clients |
+| SIM | SIM status, APN, preferred bands, IMEI, IMSI, ICCID |
+| GPS | Satellites, altitude, last fix, position (device tracker) |
+| SMS | Inbox count (only on models that support SMS) |
+
+### Binary sensors
+
+Mobile connection, 5G active, roaming allowed, SIM problem, band lock, LTE cell lock, 5G cell
+lock, IP passthrough.
+
+### Controls
+
+- **Restart** button
+- **Refresh** button (reads everything from the router immediately)
+- **WiFi** on/off
+- **Network mode** select and **data roaming** switch (only after enabling cellular changes, see
+  below)
+
+### Privacy
+
+IMEI, IMSI, ICCID, the GPS position and some diagnostic sensors are **disabled by default**. Enable
+them on the device page if you need them.
+
+## Options
+
+**Settings → Devices & services → Zyxel Router → Configure**
+
+| Option | Default | Description |
+| --- | --- | --- |
+| Fast poll interval | 30 s | Signal and traffic |
+| Slow poll interval | 300 s | Device info, SIM, bands, locks, WiFi, GPS, SMS |
+| Allow cellular changes | off | Enables network mode, band/cell lock and roaming controls |
+| Auto-revert timeout | 240 s | See below |
+| Allow raw DAL writes | off | Enables the expert action `dal_set` |
+
+The router cannot push updates, so the integration polls it.
+
+## Changing bands, cells and network mode safely
+
+A wrong band or cell lock can take a router offline, which is a serious problem for a roof-mounted
+outdoor unit. The integration therefore protects every connection-relevant change:
+
+1. **Disabled by default.** Cellular controls only appear after you enable
+   *Allow cellular changes* in the options.
+2. **Automatic revert.** The current setting is saved before each change. If the cellular
+   connection is not stable again within the auto-revert timeout, the previous setting is restored
+   automatically and a repair notice appears under **Settings → Repairs**.
+   Home Assistant reaches the router via the LAN, so this works even when the mobile connection is
+   down, as long as Home Assistant keeps running during that time.
+3. **Sanity checks.** Unsupported bands are rejected. A band list without any LTE band is rejected
+   unless the network mode is 5G SA, because 5G NSA needs an LTE anchor.
+4. The router's cell scan is deliberately not offered, as it interrupts the data connection.
+
+`dal_set` is **not** protected by the automatic revert. Only use it if you know exactly what you
+are doing.
+
+## Actions
+
+| Action | Description |
+| --- | --- |
+| `zyxel_router.set_preferred_bands` | Restrict the modem to specific bands, or `auto` |
+| `zyxel_router.set_network_mode` | `Auto`, `NR5G-NSA`, `NR5G` (SA), `LTE`, `UMTS` |
+| `zyxel_router.set_cell_lock` / `clear_cell_lock` | Lock LTE to up to 5 cells |
+| `zyxel_router.set_nr_cell_lock` / `clear_nr_cell_lock` | Lock to a 5G cell (5G SA mode only) |
+| `zyxel_router.delete_sms` | Delete an SMS from the inbox |
+| `zyxel_router.dal_get` | Read any value from the router's API (returns a response) |
+| `zyxel_router.dal_set` | Write any value (expert, must be enabled in the options) |
+
+The band and cell actions need *Allow cellular changes* enabled.
 
 ```yaml
+# Lock to the bands currently in use
 action: zyxel_router.set_preferred_bands
 data:
-  bands: ["B3", "B1", "B8", "n78"]   # oder ["auto"]
+  bands: ["B3", "B1", "B8", "n78"]
 ```
 
 ```yaml
+# Back to automatic band selection
+action: zyxel_router.set_preferred_bands
+data:
+  bands: ["auto"]
+```
+
+```yaml
+# Lock LTE to one cell (PCI and EARFCN are shown on the "Cell ID" sensor)
 action: zyxel_router.set_cell_lock
 data:
   cells:
@@ -69,58 +143,40 @@ data:
 ```
 
 ```yaml
+# Read raw data from the router
 action: zyxel_router.dal_get
 data:
   oid: cellwan_status
 response_variable: result
 ```
 
-## Installation
+## Events
 
-### HACS
-1. HACS → Benutzerdefinierte Repositories → dieses Repository als *Integration* hinzufügen
-2. „Zyxel Router“ installieren, Home Assistant neu starten
-3. *Einstellungen → Geräte & Dienste → Integration hinzufügen → Zyxel Router*
+| Event | When |
+| --- | --- |
+| `zyxel_router_sms_received` | A new SMS arrived (models with SMS support) |
+| `zyxel_router_cellular_change_reverted` | A cellular change was reverted automatically |
 
-### Manuell
-`custom_components/zyxel_router` nach `<config>/custom_components/` kopieren und HA neu starten.
+## Troubleshooting
 
-## Hinweise
-- Polling: Signal und Traffic alle 30 s (einstellbar), alles andere alle 300 s und nach jeder
-  Änderung. Der Router bietet weder Push noch Events. Sein MQTT-Client ist für `admin`
-  ausgeblendet.
-- Ist der Router über HTTPS mit selbstsigniertem Zertifikat erreichbar, „SSL-Zertifikat prüfen“
-  deaktiviert lassen. Über HTTP verschlüsselt die Integration die Daten wie die Weboberfläche
-  selbst (RSA + AES-256).
-- Der Benutzer `admin` hat bei Zyxel nur das Level „medium“. LED, SMS-Versand und MQTT sind damit
-  nicht verfügbar.
-- Ab HA 2026.3 bringt die Integration ihr Logo selbst mit (`brand/`). Ältere Versionen zeigen
-  stattdessen ein Platzhalter-Icon. Das Zyxel-Logo ist eine Marke der Zyxel Group. Diese
-  Integration ist ein inoffizielles Community-Projekt und steht in keiner Verbindung zu Zyxel.
-- Diagnosedaten (Geräteseite → Diagnose herunterladen) sind anonymisiert und helfen bei der
-  Unterstützung weiterer Modelle.
+- **Cannot connect:** Open the host address in a browser from the Home Assistant network. If
+  `https://` times out (e.g. blocked by a firewall), use `http://`. The login is encrypted by the
+  integration just like in the router's own web interface.
+- **Entities briefly unavailable:** The router allows only a limited number of sessions. Logging
+  into the web interface in a browser can end the integration's session; it logs in again
+  automatically.
+- **LED, SMS sending or MQTT missing:** The router firmware hides these functions from the
+  `admin` account, so they cannot be offered.
+- **Report a problem:** Open the device page → ⋮ → **Download diagnostics** and attach the file to
+  an [issue](https://github.com/Gulasch404/ha_zyxel/issues). Serial number, IMEI, IMSI, ICCID, IP
+  and MAC addresses, WiFi password and GPS position are removed from the file automatically.
 
-## Entwicklung
+## Notes
 
-```bash
-python tools/gen_translations.py   # strings.json + en/de aus einer Quelle
-```
+- The Zyxel logo is shown from Home Assistant 2026.3 onward.
+- This is an unofficial community project and is not affiliated with or endorsed by Zyxel.
+  Zyxel and the Zyxel logo are trademarks of Zyxel Group.
 
-Home Assistant läuft nicht nativ unter Windows. Tests daher unter Linux/WSL oder per Docker:
+## License
 
-```powershell
-# einmalig: Image mit HA-Testabhängigkeiten bauen
-docker run --name zyxel-test-build python:3.14-slim pip install -q pytest-homeassistant-custom-component
-docker commit zyxel-test-build zyxel-ha-test:latest; docker rm zyxel-test-build
-
-# Tests
-docker run --rm -v "${PWD}:/src:ro" zyxel-ha-test:latest bash -c `
-  "mkdir /work && cd /src && tar --exclude=.venv -cf - . | tar -xf - -C /work && cd /work && pytest -q"
-```
-
-`tools/probe.py` liest alle bekannten OIDs eines Geräts aus (nur lesend), um neue Modelle zu
-analysieren:
-
-```bash
-ZYXEL_HOST=http://192.168.1.1 ZYXEL_USER=admin ZYXEL_PASS=... python tools/probe.py dumps/
-```
+[MIT](LICENSE)
