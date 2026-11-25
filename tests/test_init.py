@@ -13,6 +13,7 @@ from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events
 
 from custom_components.zyxel_router import coordinator as coord_mod
+from custom_components.zyxel_router.api import ZyxelError
 from custom_components.zyxel_router.const import DOMAIN, EVENT_REVERTED
 
 
@@ -51,6 +52,7 @@ async def test_setup_and_entities(hass: HomeAssistant, mock_client: AsyncMock, c
 
     assert await hass.config_entries.async_unload(config_entry.entry_id)
     mock_client.logout.assert_awaited()
+    mock_client.close.assert_awaited()
 
 
 async def test_wlan_switch(hass: HomeAssistant, mock_client: AsyncMock, router, config_entry) -> None:
@@ -61,6 +63,65 @@ async def test_wlan_switch(hass: HomeAssistant, mock_client: AsyncMock, router, 
     assert (method, oid) == ("PUT", "wlan")
     assert payload["Index"] == 1 and payload["wlEnable"] is False
     assert payload["SSID"] == "Zyxel_TEST"
+    assert payload["psk_value"] == "TESTPSK123"
+    assert payload["securityLevel"] == "MoreSecure"
+
+
+async def test_setup_closes_session_on_login_failure(
+    hass: HomeAssistant, mock_client: AsyncMock, config_entry
+) -> None:
+    mock_client.login.side_effect = ZyxelError("boom")
+    config_entry.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(config_entry.entry_id)
+    assert config_entry.state is ConfigEntryState.SETUP_RETRY
+    mock_client.close.assert_awaited()
+
+
+async def test_setup_closes_session_on_refresh_failure(
+    hass: HomeAssistant, mock_client: AsyncMock, config_entry
+) -> None:
+    mock_client.dal_get.side_effect = ZyxelError("boom")
+    mock_client.dal_get_one.side_effect = ZyxelError("boom")
+    config_entry.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(config_entry.entry_id)
+    assert config_entry.state is ConfigEntryState.SETUP_RETRY
+    mock_client.close.assert_awaited()
+
+
+@pytest.mark.parametrize(
+    "wlan",
+    [
+        {"Index": 1, "wlEnable": True, "SSID": "x", "SecurityMode": "WPA3-Personal"},
+        {"Index": 1, "wlEnable": True, "SSID": "x", "SecurityMode": "WPA2-Personal"},
+        {"Index": 1, "wlEnable": True, "SecurityMode": "WPA2-Personal", "PskDisplay": "p"},
+    ],
+    ids=["unsupported_security", "psk_missing", "ssid_missing"],
+)
+async def test_wlan_switch_refuses_incomplete_data(
+    hass: HomeAssistant, mock_client: AsyncMock, router, config_entry, wlan
+) -> None:
+    """A WLAN switch must never guess settings the router did not return."""
+    router.objects["wlan"] = [wlan]
+    await _setup(hass, config_entry)
+    state = _state(hass, "switch", "wlan_1")
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(
+            "switch", "turn_off", {"entity_id": state.entity_id}, blocking=True
+        )
+    assert [w for w in router.writes if w[1] == "wlan"] == []
+
+
+async def test_sms_inbox_sensor_hides_messages(
+    hass: HomeAssistant, mock_client: AsyncMock, router, config_entry
+) -> None:
+    router.objects["cellwan_sms"] = [
+        {"SMS_Inbox": [{"From": "+431234", "Content": "code 1234", "Time": "2026-11-25"}]}
+    ]
+    await _setup(hass, config_entry)
+    state = _state(hass, "sensor", "sms_inbox")
+    assert state.state == "1"
+    assert "messages" not in state.attributes
+    assert "code 1234" not in str(state.attributes)
 
 
 async def test_cellular_change_blocked_by_default(

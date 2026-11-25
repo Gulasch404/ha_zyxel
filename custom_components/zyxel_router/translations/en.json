@@ -360,6 +360,15 @@
     },
     "raw_writes_disabled": {
       "message": "Raw DAL writes are disabled in the integration options."
+    },
+    "wlan_unavailable": {
+      "message": "The settings of WiFi {index} have not been read from the router yet. Try again after the next update."
+    },
+    "wlan_security_unsupported": {
+      "message": "WiFi {ssid} uses security mode {mode}, which this switch cannot write safely. Change it in the router's web interface instead."
+    },
+    "wlan_psk_missing": {
+      "message": "The router did not return the passphrase of WiFi {ssid}. Refusing to write, as this would reset the WiFi password."
     }
   },
   "issues": {

@@ -7,10 +7,11 @@ from typing import Any
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import cellular
-from .const import FEATURE_CELLULAR, FEATURE_WLAN
+from .const import DOMAIN, FEATURE_CELLULAR, FEATURE_WLAN
 from .coordinator import ZyxelConfigEntry, ZyxelCoordinator
 from .entity import ZyxelEntity
 
@@ -25,23 +26,49 @@ def _wlan_label(wlan: dict[str, Any], position: int) -> str:
     return f"{band} {wlan.get('SSID') or wlan.get('Index')}"
 
 
+# Security modes the payload knows how to express. Anything else (WPA3, WEP,
+# enterprise) is refused so a plain on/off can never downgrade the WiFi security.
+_SECURITY_FIELDS: dict[str, dict[str, Any]] = {
+    "WPA2-Personal": {"securityLevel": "MoreSecure", "wpaMode": "wpa2psk"},
+    "None": {"securityLevel": "NoSecurity"},
+}
+
+
 def build_wlan_payload(obj: dict[str, Any], index: int, enable: bool) -> dict[str, Any]:
-    """Build the wlan PUT payload like the web GUI does (keeps SSID/PSK/security)."""
+    """Build the wlan PUT payload like the web GUI does (keeps SSID/PSK/security).
+
+    Only values the router actually returned are sent. If anything needed to
+    rebuild the current configuration is missing, raise instead of guessing,
+    because a wrong payload rewrites the user's WiFi settings.
+    """
+    ssid = obj.get("SSID")
+    if not obj or not ssid:
+        raise HomeAssistantError(
+            translation_domain=DOMAIN,
+            translation_key="wlan_unavailable",
+            translation_placeholders={"index": str(index)},
+        )
     sec = obj.get("SecurityMode")
-    payload: dict[str, Any] = {
-        "Index": index,
-        "wlEnable": enable,
-        "SSID": obj.get("SSID"),
-        "wlHide": obj.get("wlHide", False),
-        "AutoGenPSK": obj.get("AutoGenPSK", False),
-        "psk_value": obj.get("PskDisplay") or obj.get("CurrentPSKValue", ""),
-        "RekeyingInterval": obj.get("RekeyingInterval", 3600),
-        "encryp": obj.get("encryp", "aes"),
-    }
+    if sec not in _SECURITY_FIELDS:
+        raise HomeAssistantError(
+            translation_domain=DOMAIN,
+            translation_key="wlan_security_unsupported",
+            translation_placeholders={"ssid": str(ssid), "mode": str(sec or "unknown")},
+        )
+    payload: dict[str, Any] = {"Index": index, "wlEnable": enable, "SSID": ssid}
+    for key in ("wlHide", "AutoGenPSK", "RekeyingInterval", "encryp"):
+        if key in obj:
+            payload[key] = obj[key]
     if sec == "WPA2-Personal":
-        payload |= {"securityLevel": "MoreSecure", "wpaMode": "wpa2psk"}
-    elif sec in ("None", None):
-        payload |= {"securityLevel": "NoSecurity"}
+        psk = obj.get("PskDisplay") or obj.get("CurrentPSKValue")
+        if not psk:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="wlan_psk_missing",
+                translation_placeholders={"ssid": str(ssid)},
+            )
+        payload["psk_value"] = psk
+    payload |= _SECURITY_FIELDS[sec]
     return payload
 
 

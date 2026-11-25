@@ -602,7 +602,8 @@ SENSORS: tuple[ZyxelSensorDescription, ...] = (
         feature=FEATURE_SMS,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: len(d.sms_inbox),
-        attr_fn=lambda d: {"messages": d.sms_inbox[-10:]},
+        # Message contents are deliberately not exposed as attributes (recorder,
+        # dashboards). Use the zyxel_router_sms_received event instead.
     ),
 )
 

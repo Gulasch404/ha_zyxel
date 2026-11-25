@@ -2,6 +2,19 @@
 
 All notable changes to this integration are documented here. The newest version is at the top.
 
+## [0.2.1] - 2026-11-25
+
+Fixes from the HACS review: no SMS contents in sensor attributes, safer WiFi switches, closed HTTP sessions.
+
+### Changed
+
+- The SMS inbox sensor no longer exposes message contents (sender, text) as attributes; attributes are stored in the recorder database and visible to every dashboard user. The sensor keeps the message count; use the `zyxel_router_sms_received` event for message contents.
+- WiFi switches only write settings the router actually returned. If the SSID, the passphrase or the WiFi object is missing, or the security mode is not WPA2-Personal or open, the switch raises an error instead of guessing values that could change the WiFi configuration.
+
+### Fixed
+
+- HTTP sessions are now closed when login or the first refresh fails and when the integration is unloaded.
+
 ## [0.2.0] - 2026-11-11
 
 Support for more Zyxel models: 5G/LTE, DSL and fiber/Ethernet WAN routers with the current web interface. Only the NR7101 is tested so far; see the supported devices list in the README and please [report your device](https://github.com/Gulasch404/ha_zyxel/issues/new?template=device_report.yml).
@@ -57,6 +70,7 @@ First release.
 - `dal_get` and `dal_set` expert actions, SMS event, diagnostics.
 - English and German translations, Zyxel logo.
 
+[0.2.1]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Gulasch404/ha_zyxel/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/Gulasch404/ha_zyxel/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Gulasch404/ha_zyxel/compare/v0.1.1...v0.1.2

@@ -55,12 +55,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ZyxelConfigEntry) -> boo
     try:
         await client.login()
     except ZyxelAuthError as err:
+        await client.close()
         raise ConfigEntryAuthFailed(str(err)) from err
     except ZyxelError as err:
+        await client.close()
         raise ConfigEntryNotReady(str(err)) from err
 
     coordinator = ZyxelCoordinator(hass, entry, client)
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except Exception:
+        await client.close()
+        raise
     entry.runtime_data = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -76,5 +82,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ZyxelConfigEntry) -> bo
     """Unload a config entry."""
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unloaded:
-        await entry.runtime_data.client.logout()
+        client = entry.runtime_data.client
+        await client.logout()
+        await client.close()
     return unloaded
