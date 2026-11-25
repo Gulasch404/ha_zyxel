@@ -355,12 +355,6 @@
     "device_required": {
       "message": "Please select a Zyxel device."
     },
-    "sms_not_supported": {
-      "message": "This device does not support SMS."
-    },
-    "raw_writes_disabled": {
-      "message": "Raw DAL writes are disabled in the integration options."
-    },
     "wlan_unavailable": {
       "message": "The settings of WiFi {index} have not been read from the router yet. Try again after the next update."
     },
@@ -369,6 +363,12 @@
     },
     "wlan_psk_missing": {
       "message": "The router did not return the passphrase of WiFi {ssid}. Refusing to write, as this would reset the WiFi password."
+    },
+    "sms_not_supported": {
+      "message": "This device does not support SMS."
+    },
+    "raw_writes_disabled": {
+      "message": "Raw DAL writes are disabled in the integration options."
     }
   },
   "issues": {

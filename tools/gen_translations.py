@@ -136,6 +136,18 @@ EXCEPTIONS = {
         "Please select a Zyxel device.",
         "Bitte ein Zyxel-Gerät auswählen.",
     ),
+    "wlan_unavailable": (
+        "The settings of WiFi {index} have not been read from the router yet. Try again after the next update.",
+        "Die Einstellungen von WLAN {index} wurden noch nicht vom Router gelesen. Versuche es nach der nächsten Aktualisierung erneut.",
+    ),
+    "wlan_security_unsupported": (
+        "WiFi {ssid} uses security mode {mode}, which this switch cannot write safely. Change it in the router's web interface instead.",
+        "WLAN {ssid} verwendet den Sicherheitsmodus {mode}, den dieser Schalter nicht sicher schreiben kann. Ändere ihn stattdessen in der Weboberfläche des Routers.",
+    ),
+    "wlan_psk_missing": (
+        "The router did not return the passphrase of WiFi {ssid}. Refusing to write, as this would reset the WiFi password.",
+        "Der Router hat das Passwort von WLAN {ssid} nicht zurückgegeben. Schreiben wird verweigert, da dies das WLAN-Passwort zurücksetzen würde.",
+    ),
     "sms_not_supported": (
         "This device does not support SMS.",
         "Dieses Gerät unterstützt keine SMS.",

@@ -355,12 +355,6 @@
     "device_required": {
       "message": "Bitte ein Zyxel-Gerät auswählen."
     },
-    "sms_not_supported": {
-      "message": "Dieses Gerät unterstützt keine SMS."
-    },
-    "raw_writes_disabled": {
-      "message": "Rohe DAL-Schreibzugriffe sind in den Optionen deaktiviert."
-    },
     "wlan_unavailable": {
       "message": "Die Einstellungen von WLAN {index} wurden noch nicht vom Router gelesen. Versuche es nach der nächsten Aktualisierung erneut."
     },
@@ -369,6 +363,12 @@
     },
     "wlan_psk_missing": {
       "message": "Der Router hat das Passwort von WLAN {ssid} nicht zurückgegeben. Schreiben wird verweigert, da dies das WLAN-Passwort zurücksetzen würde."
+    },
+    "sms_not_supported": {
+      "message": "Dieses Gerät unterstützt keine SMS."
+    },
+    "raw_writes_disabled": {
+      "message": "Rohe DAL-Schreibzugriffe sind in den Optionen deaktiviert."
     }
   },
   "issues": {
