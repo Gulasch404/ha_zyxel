@@ -16,6 +16,7 @@ from homeassistant.core import (
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.service import async_register_admin_service
 
 from . import cellular
 from .api import ZyxelError
@@ -179,10 +180,18 @@ def async_setup_services(hass: HomeAssistant) -> None:
         SERVICE_SET_NR_CELL_LOCK: (set_nr_cell_lock, SupportsResponse.NONE),
         SERVICE_CLEAR_NR_CELL_LOCK: (clear_nr_cell_lock, SupportsResponse.NONE),
         SERVICE_DELETE_SMS: (delete_sms, SupportsResponse.NONE),
-        SERVICE_DAL_GET: (dal_get, SupportsResponse.ONLY),
-        SERVICE_DAL_SET: (dal_set, SupportsResponse.OPTIONAL),
     }
     for name, (handler, supports) in handlers.items():
         hass.services.async_register(
             DOMAIN, name, handler, schema=SCHEMAS[name], supports_response=supports
+        )
+    # Raw DAL access returns secrets (Wi-Fi passphrases, RADIUS secret, ...) and
+    # can write any object without the watchdog: administrators only.
+    admin_handlers = {
+        SERVICE_DAL_GET: (dal_get, SupportsResponse.ONLY),
+        SERVICE_DAL_SET: (dal_set, SupportsResponse.OPTIONAL),
+    }
+    for name, (handler, supports) in admin_handlers.items():
+        async_register_admin_service(
+            hass, DOMAIN, name, handler, schema=SCHEMAS[name], supports_response=supports
         )

@@ -2,6 +2,13 @@
 
 All notable changes to this integration are documented here. The newest version is at the top.
 
+## [0.2.3] - 2026-11-26
+
+### Changed
+
+- The `dal_get` and `dal_set` actions can now only be called by administrators. They return and write raw router objects, including Wi-Fi passphrases and other secrets.
+- README: the installation section now starts with the Marketplace / HACS search.
+
 ## [0.2.2] - 2026-11-25
 
 ### Fixed
@@ -76,6 +83,7 @@ First release.
 - `dal_get` and `dal_set` expert actions, SMS event, diagnostics.
 - English and German translations, Zyxel logo.
 
+[0.2.3]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Gulasch404/ha_zyxel/compare/v0.1.3...v0.2.0

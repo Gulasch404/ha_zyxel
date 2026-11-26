@@ -58,12 +58,13 @@ and attach the diagnostics file. This is how models move to ✅.
 
 ### Marketplace / HACS (recommended)
 
-1. Click the button above. Or add the repository manually:
-   - Home Assistant 2026.11 and newer: **Settings → Marketplace** → ⋮ → **Custom repositories**
-   - Older versions with HACS: HACS → ⋮ → **Custom repositories**
+1. Open **Settings → Marketplace** (Home Assistant 2026.11 and newer) or **HACS** (older
+   versions) and search for **Zyxel Router**.
+2. Download it. With HACS, restart Home Assistant afterwards.
 
-   Repository `https://github.com/Gulasch404/ha_zyxel`, type **Integration**.
-2. Download **Zyxel Router**. With HACS, restart Home Assistant afterwards.
+If the search does not find it yet, click the button above or add the repository as a custom
+repository (⋮ → **Custom repositories**, URL `https://github.com/Gulasch404/ha_zyxel`, type
+**Integration**) and download it from there.
 
 ### Manual
 
@@ -160,8 +161,8 @@ are doing.
 | `zyxel_router.set_cell_lock` / `clear_cell_lock` | Lock LTE to up to 5 cells |
 | `zyxel_router.set_nr_cell_lock` / `clear_nr_cell_lock` | Lock to a 5G cell (5G SA mode only) |
 | `zyxel_router.delete_sms` | Delete an SMS from the inbox |
-| `zyxel_router.dal_get` | Read any value from the router's API (returns a response) |
-| `zyxel_router.dal_set` | Write any value (expert, must be enabled in the options) |
+| `zyxel_router.dal_get` | Read any value from the router's API (returns a response, administrators only) |
+| `zyxel_router.dal_set` | Write any value (expert, administrators only, must be enabled in the options) |
 
 The band and cell actions need *Allow cellular changes* enabled.
 

@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.core import Context, HomeAssistant
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError, Unauthorized
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events
@@ -217,3 +217,24 @@ async def test_dal_get_service(hass: HomeAssistant, mock_client: AsyncMock, conf
         await hass.services.async_call(
             DOMAIN, "dal_set", {"oid": "wlan", "payload": {}}, blocking=True, return_response=True
         )
+
+
+@pytest.mark.parametrize(
+    ("service", "data"),
+    [("dal_get", {"oid": "wlan"}), ("dal_set", {"oid": "wlan", "payload": {}})],
+)
+async def test_dal_services_require_admin(
+    hass: HomeAssistant, mock_client: AsyncMock, router, config_entry, hass_read_only_user, service, data
+) -> None:
+    """Raw DAL access exposes Wi-Fi passphrases and other secrets: admins only."""
+    await _setup(hass, config_entry, allow_raw_writes=True)
+    with pytest.raises(Unauthorized):
+        await hass.services.async_call(
+            DOMAIN,
+            service,
+            data,
+            blocking=True,
+            return_response=True,
+            context=Context(user_id=hass_read_only_user.id),
+        )
+    assert router.writes == []
