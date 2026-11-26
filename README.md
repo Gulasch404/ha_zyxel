@@ -32,7 +32,7 @@ projects, expected to work · ⚪ same product family, not confirmed yet · ❌ 
 
 | Model | Status | Notes |
 | --- | --- | --- |
-| VMG8825-T50, VMG8623-T50B, VMG4005-B50A | 🟢 | VMG4005: use a poll interval of 60 s or more |
+| VMG8825-T50, VMG8623-T50B, VMG4005-B50A | 🟢 | VMG4005: poll less often, see [Options](#options) |
 | DX3301-T0, EX3301-T0 | 🟢 | |
 | VMG3625-T50B | 🟢 | Login problems reported with some firmwares |
 | DX3300, DX5401, EX5501 | ⚪ | |
@@ -125,13 +125,17 @@ them on the device page if you need them.
 
 | Option | Default | Description |
 | --- | --- | --- |
-| Fast poll interval | 30 s | Signal and traffic |
 | Slow poll interval | 300 s | Device info, SIM, bands, locks, WiFi, GPS, SMS |
 | Allow cellular changes | off | Enables network mode, band/cell lock and roaming controls |
 | Auto-revert timeout | 240 s | See below |
+| Include SMS text in events | off | Adds the message text to the `zyxel_router_sms_received` event |
 | Allow raw DAL writes | off | Enables the expert action `dal_set` |
 
-The router cannot push updates, so the integration polls it.
+The router cannot push updates, so the integration polls it: signal and traffic every 30 seconds,
+everything else at the slow interval. To poll less often (slow routers such as the VMG4005), use
+the standard Home Assistant way: open the integration's **System options** (⋮ on the integration
+card), disable **Polling for updates**, and create an automation that calls
+`homeassistant.update_entity` on one of the router's entities at the rate you want.
 
 ## Changing bands, cells and network mode safely
 
@@ -204,6 +208,18 @@ response_variable: result
 | `zyxel_router_sms_received` | A new SMS arrived (models with SMS support) |
 | `zyxel_router_cellular_change_reverted` | A cellular change was reverted automatically |
 
+The SMS event carries `entry_id`, `index`, `from` and `time`. The message text (`content`) is only
+included when **Include SMS text in events** is enabled in the options, because Home Assistant
+stores events in the recorder database. If you enable it, consider excluding the event from the
+recorder:
+
+```yaml
+recorder:
+  exclude:
+    event_types:
+      - zyxel_router_sms_received
+```
+
 ## Troubleshooting
 
 - **Cannot connect:** Open the host address in a browser from the Home Assistant network. If
@@ -216,13 +232,15 @@ response_variable: result
   applies the other way round: if the web interface refuses your login, temporarily disable the
   integration (device page → ⋮ → Disable).
 - **Router slow or unresponsive:** Some models (e.g. VMG4005-B50A) struggle with frequent polling.
-  Increase the fast poll interval in the options to 60 seconds or more.
+  Disable polling in the system options and update every 60 seconds or more from an automation
+  (see [Options](#options)).
 - **LED, SMS sending or MQTT missing:** The router firmware hides these functions from the
   `admin` account, so they cannot be offered.
 - **Cellular controls:** Network mode, band and cell lock only exist on 5G/LTE devices.
 - **Report a problem:** Open the device page → ⋮ → **Download diagnostics** and attach the file to
   an [issue](https://github.com/Gulasch404/ha_zyxel/issues). Serial number, IMEI, IMSI, ICCID, IP
-  and MAC addresses, WiFi password and GPS position are removed from the file automatically.
+  and MAC addresses, host names, passwords, PINs, WiFi passwords and the GPS position are removed
+  from the file automatically.
 
 ## Notes
 

@@ -48,10 +48,10 @@ async def test_options_flow(hass: HomeAssistant, mock_client: AsyncMock, config_
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         {
-            "scan_interval": 15,
             "slow_interval": 120,
             "allow_cellular_changes": True,
             "revert_timeout": 300,
+            "sms_content_in_events": False,
             "allow_raw_writes": False,
         },
     )

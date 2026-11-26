@@ -17,15 +17,20 @@ class ZyxelEntity(CoordinatorEntity[ZyxelCoordinator]):
     def __init__(self, coordinator: ZyxelCoordinator, key: str) -> None:
         super().__init__(coordinator)
         entry = coordinator.config_entry
-        self._attr_unique_id = f"{entry.unique_id or entry.entry_id}_{key}"
-        info = coordinator.data.device_info if coordinator.data else {}
+        self._device_id = entry.unique_id or entry.entry_id
+        self._attr_unique_id = f"{self._device_id}_{key}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Device info, read live so a firmware update shows up without a reload."""
+        data = self.coordinator.data
+        info = data.device_info if data else {}
         mac = None
-        if coordinator.data:
-            ports = coordinator.data.status.get("LanPortInfo") or []
+        if data:
+            ports = data.status.get("LanPortInfo") or []
             mac = ports[0].get("MACAddress") if ports else None
-        cfg_url = coordinator.client.base_url
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._device_id)},
             connections={(CONNECTION_NETWORK_MAC, mac.lower())} if mac else set(),
             manufacturer=MANUFACTURER,
             model=info.get("ModelName"),
@@ -34,5 +39,5 @@ class ZyxelEntity(CoordinatorEntity[ZyxelCoordinator]):
             serial_number=info.get("SerialNumber"),
             sw_version=info.get("SoftwareVersion"),
             hw_version=info.get("HardwareVersion"),
-            configuration_url=cfg_url,
+            configuration_url=self.coordinator.client.base_url,
         )

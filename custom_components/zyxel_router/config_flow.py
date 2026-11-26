@@ -8,37 +8,40 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.config_entries import (
+    ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
 )
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_SCAN_INTERVAL, CONF_USERNAME
-from homeassistant.core import callback
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import selector
 
 from .api import ZyxelAuthError, ZyxelConnectionError, ZyxelError, ZyxelSessionBusyError
+from .client import create_client
 from .const import (
     CONF_ALLOW_CELLULAR_CHANGES,
     CONF_ALLOW_RAW_WRITES,
     CONF_REVERT_TIMEOUT,
     CONF_SLOW_INTERVAL,
+    CONF_SMS_CONTENT_IN_EVENTS,
     CONF_VERIFY_SSL,
     DEFAULT_HOST,
     DEFAULT_REVERT_TIMEOUT,
-    DEFAULT_SCAN_INTERVAL,
     DEFAULT_SLOW_INTERVAL,
     DEFAULT_USERNAME,
     DOMAIN,
-    MIN_SCAN_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
+_PASSWORD_SELECTOR = selector.TextSelector(
+    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+)
 
-async def _validate(hass, data: dict[str, Any]) -> dict[str, Any]:
+
+async def _validate(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Log in and return the device info."""
-    from . import create_client
-
     client = create_client(hass, data)
     try:
         await client.login()
@@ -49,16 +52,15 @@ async def _validate(hass, data: dict[str, Any]) -> dict[str, Any]:
     return status.get("DeviceInfo") or {}
 
 
-def _user_schema(defaults: Mapping[str, Any]) -> vol.Schema:
+def _user_schema(defaults: Mapping[str, Any], *, password_required: bool = True) -> vol.Schema:
+    password_key = vol.Required(CONF_PASSWORD) if password_required else vol.Optional(CONF_PASSWORD)
     return vol.Schema(
         {
             vol.Required(CONF_HOST, default=defaults.get(CONF_HOST, DEFAULT_HOST)): str,
             vol.Required(
                 CONF_USERNAME, default=defaults.get(CONF_USERNAME, DEFAULT_USERNAME)
             ): str,
-            vol.Required(CONF_PASSWORD): selector.TextSelector(
-                selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
-            ),
+            password_key: _PASSWORD_SELECTOR,
             vol.Optional(
                 CONF_VERIFY_SSL, default=defaults.get(CONF_VERIFY_SSL, False)
             ): bool,
@@ -80,8 +82,11 @@ class ZyxelConfigFlow(ConfigFlow, domain=DOMAIN):
             errors["base"] = "session_busy"
         except ZyxelConnectionError:
             errors["base"] = "cannot_connect"
-        except ZyxelError:
-            _LOGGER.exception("Unexpected Zyxel error")
+        except ZyxelError as err:
+            _LOGGER.warning("Router error during setup: %s", err)
+            errors["base"] = "unknown"
+        except Exception:
+            _LOGGER.exception("Unexpected exception during setup")
             errors["base"] = "unknown"
         return None
 
@@ -109,18 +114,21 @@ class ZyxelConfigFlow(ConfigFlow, domain=DOMAIN):
         entry = self._get_reauth_entry()
         if user_input is not None:
             data = {**entry.data, **user_input}
-            if await self._try(data, errors) is not None:
+            info = await self._try(data, errors)
+            if info is not None:
+                # make sure the new credentials belong to the same router
+                await self.async_set_unique_id(info.get("SerialNumber") or entry.unique_id)
+                self._abort_if_unique_id_mismatch()
                 return self.async_update_reload_and_abort(entry, data=data)
         return self.async_show_form(
             step_id="reauth_confirm",
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_USERNAME, default=entry.data[CONF_USERNAME]): str,
-                    vol.Required(CONF_PASSWORD): selector.TextSelector(
-                        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
-                    ),
+                    vol.Required(CONF_PASSWORD): _PASSWORD_SELECTOR,
                 }
             ),
+            description_placeholders={CONF_HOST: entry.data[CONF_HOST]},
             errors=errors,
         )
 
@@ -130,20 +138,25 @@ class ZyxelConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         entry = self._get_reconfigure_entry()
         if user_input is not None:
-            info = await self._try(user_input, errors)
+            # keep the stored password when the field is left empty
+            data = {**user_input}
+            if not data.get(CONF_PASSWORD):
+                data[CONF_PASSWORD] = entry.data[CONF_PASSWORD]
+            info = await self._try(data, errors)
             if info is not None:
                 await self.async_set_unique_id(info.get("SerialNumber") or entry.unique_id)
                 self._abort_if_unique_id_mismatch()
-                return self.async_update_reload_and_abort(entry, data=user_input)
+                return self.async_update_reload_and_abort(entry, data=data)
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=_user_schema(user_input or entry.data),
+            data_schema=_user_schema(user_input or entry.data, password_required=False),
+            description_placeholders={CONF_HOST: entry.data[CONF_HOST]},
             errors=errors,
         )
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry) -> ZyxelOptionsFlow:
+    def async_get_options_flow(config_entry: ConfigEntry) -> ZyxelOptionsFlow:
         return ZyxelOptionsFlow()
 
 
@@ -159,10 +172,6 @@ class ZyxelOptionsFlow(OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_SCAN_INTERVAL,
-                        default=opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=MIN_SCAN_INTERVAL, max=3600)),
-                    vol.Required(
                         CONF_SLOW_INTERVAL,
                         default=opts.get(CONF_SLOW_INTERVAL, DEFAULT_SLOW_INTERVAL),
                     ): vol.All(vol.Coerce(int), vol.Range(min=30, max=86400)),
@@ -174,6 +183,10 @@ class ZyxelOptionsFlow(OptionsFlow):
                         CONF_REVERT_TIMEOUT,
                         default=opts.get(CONF_REVERT_TIMEOUT, DEFAULT_REVERT_TIMEOUT),
                     ): vol.All(vol.Coerce(int), vol.Range(min=90, max=1800)),
+                    vol.Required(
+                        CONF_SMS_CONTENT_IN_EVENTS,
+                        default=opts.get(CONF_SMS_CONTENT_IN_EVENTS, False),
+                    ): bool,
                     vol.Required(
                         CONF_ALLOW_RAW_WRITES,
                         default=opts.get(CONF_ALLOW_RAW_WRITES, False),

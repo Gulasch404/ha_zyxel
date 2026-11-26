@@ -148,6 +148,10 @@ EXCEPTIONS = {
         "The router did not return the passphrase of WiFi {ssid}. Refusing to write, as this would reset the WiFi password.",
         "Der Router hat das Passwort von WLAN {ssid} nicht zurückgegeben. Schreiben wird verweigert, da dies das WLAN-Passwort zurücksetzen würde.",
     ),
+    "communication_error": (
+        "Communication with the router failed: {error}",
+        "Kommunikation mit dem Router fehlgeschlagen: {error}",
+    ),
     "sms_not_supported": (
         "This device does not support SMS.",
         "Dieses Gerät unterstützt keine SMS.",
@@ -302,10 +306,20 @@ def build(lang: int) -> dict:
                 },
                 "reauth_confirm": {
                     "title": "Re-authenticate" if en else "Erneut anmelden",
+                    "description": (
+                        "The router at {host} rejected the login. Enter the current credentials of its web interface."
+                        if en
+                        else "Der Router unter {host} hat die Anmeldung abgelehnt. Gib die aktuellen Zugangsdaten seiner Weboberfläche ein."
+                    ),
                     "data": {"username": user_fields["username"], "password": user_fields["password"]},
                 },
                 "reconfigure": {
                     "title": "Reconfigure" if en else "Neu konfigurieren",
+                    "description": (
+                        "Change the connection settings of the router at {host}. Leave the password empty to keep the stored one."
+                        if en
+                        else "Verbindungseinstellungen des Routers unter {host} ändern. Passwort leer lassen, um das gespeicherte zu behalten."
+                    ),
                     "data": user_fields,
                     "data_description": {"host": host_desc},
                 },
@@ -323,14 +337,13 @@ def build(lang: int) -> dict:
                 "init": {
                     "title": "Options" if en else "Optionen",
                     "data": {
-                        "scan_interval": "Fast poll interval (s)" if en else "Schnelles Abfrageintervall (s)",
                         "slow_interval": "Slow poll interval (s)" if en else "Langsames Abfrageintervall (s)",
                         "allow_cellular_changes": "Allow cellular changes" if en else "Mobilfunk-Änderungen erlauben",
                         "revert_timeout": "Auto-revert timeout (s)" if en else "Auto-Revert-Zeitlimit (s)",
+                        "sms_content_in_events": "Include SMS text in events" if en else "SMS-Text in Events aufnehmen",
                         "allow_raw_writes": "Allow raw DAL writes (expert)" if en else "Rohe DAL-Schreibzugriffe erlauben (Experte)",
                     },
                     "data_description": {
-                        "scan_interval": "Signal and traffic." if en else "Signal und Traffic.",
                         "slow_interval": "Device info, SIM, bands, locks, WLAN, GNSS, SMS." if en else "Geräteinfo, SIM, Bänder, Locks, WLAN, GNSS, SMS.",
                         "allow_cellular_changes": (
                             "Enables network mode, band/cell lock and roaming controls. Every change is verified and reverted automatically if the connection does not come back."
@@ -341,6 +354,11 @@ def build(lang: int) -> dict:
                             "Time the connection has to come back after a cellular change before the previous setting is restored."
                             if en
                             else "Zeit, in der die Verbindung nach einer Mobilfunk-Änderung wiederkommen muss, bevor die vorherige Einstellung wiederhergestellt wird."
+                        ),
+                        "sms_content_in_events": (
+                            "Adds the message text to the zyxel_router_sms_received event. Events are stored in the recorder database; off by default."
+                            if en
+                            else "Fügt den Nachrichtentext zum Event zyxel_router_sms_received hinzu. Events werden in der Recorder-Datenbank gespeichert; standardmäßig aus."
                         ),
                         "allow_raw_writes": (
                             "Allows the dal_set action. Not protected by the watchdog!"

@@ -8,6 +8,7 @@ from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import cellular
@@ -87,6 +88,11 @@ async def async_setup_entry(
         )
     if FEATURE_CELLULAR in coordinator.data.features and coordinator.allow_cellular_changes:
         entities.append(ZyxelRoamingSwitch(coordinator))
+    else:
+        registry = er.async_get(hass)
+        uid = f"{entry.unique_id or entry.entry_id}_roaming_switch"
+        if entity_id := registry.async_get_entity_id("switch", DOMAIN, uid):
+            registry.async_remove(entity_id)
     async_add_entities(entities)
 
 

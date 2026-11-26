@@ -2,21 +2,15 @@
 
 from __future__ import annotations
 
-import aiohttp
-from homeassistant.const import (
-    CONF_HOST,
-    CONF_PASSWORD,
-    CONF_USERNAME,
-    Platform,
-)
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.typing import ConfigType
 
-from .api import ZyxelAuthError, ZyxelClient, ZyxelError
-from .const import CONF_VERIFY_SSL, DOMAIN
+from .api import ZyxelAuthError, ZyxelError
+from .client import create_client
+from .const import DOMAIN
 from .coordinator import ZyxelConfigEntry, ZyxelCoordinator
 from .services import async_setup_services
 
@@ -30,17 +24,6 @@ PLATFORMS: list[Platform] = [
 ]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-
-
-def create_client(hass: HomeAssistant, data: dict) -> ZyxelClient:
-    """Create an API client with its own cookie jar (IP hosts need unsafe jar)."""
-    verify = bool(data.get(CONF_VERIFY_SSL, False))
-    session = async_create_clientsession(
-        hass, verify_ssl=verify, cookie_jar=aiohttp.CookieJar(unsafe=True)
-    )
-    return ZyxelClient(
-        data[CONF_HOST], data[CONF_USERNAME], data[CONF_PASSWORD], session, verify_ssl=verify
-    )
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:

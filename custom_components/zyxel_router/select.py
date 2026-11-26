@@ -5,10 +5,11 @@ from __future__ import annotations
 from homeassistant.components.select import SelectEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import cellular
-from .const import FEATURE_BAND, NETWORK_MODE_OPTIONS
+from .const import DOMAIN, FEATURE_BAND, NETWORK_MODE_OPTIONS
 from .coordinator import ZyxelConfigEntry, ZyxelCoordinator
 from .entity import ZyxelEntity
 
@@ -24,6 +25,12 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     if FEATURE_BAND in coordinator.data.features and coordinator.allow_cellular_changes:
         async_add_entities([ZyxelNetworkModeSelect(coordinator)])
+    else:
+        # option turned off: do not leave an orphaned "unavailable" entity behind
+        registry = er.async_get(hass)
+        uid = f"{entry.unique_id or entry.entry_id}_network_mode"
+        if entity_id := registry.async_get_entity_id("select", DOMAIN, uid):
+            registry.async_remove(entity_id)
 
 
 class ZyxelNetworkModeSelect(ZyxelEntity, SelectEntity):

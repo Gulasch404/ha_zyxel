@@ -96,7 +96,7 @@ def router() -> FakeRouter:
 def mock_client(router: FakeRouter) -> Generator[AsyncMock]:
     """Patch ZyxelClient everywhere."""
     with (
-        patch("custom_components.zyxel_router.ZyxelClient", autospec=True) as cls,
+        patch("custom_components.zyxel_router.client.ZyxelClient", autospec=True) as cls,
         patch("custom_components.zyxel_router.config_flow._validate") as validate,
     ):
         client = cls.return_value
@@ -105,6 +105,9 @@ def mock_client(router: FakeRouter) -> Generator[AsyncMock]:
         client.login = AsyncMock(return_value={"result": "ZCFG_SUCCESS"})
         client.logout = AsyncMock()
         client.reboot = AsyncMock()
+        client.cgi_get = AsyncMock(
+            return_value={"MenuList": [{"title": "Network", "submenu": [{"title": "WAN"}]}]}
+        )
         client.dal_get.side_effect = router.dal_get
         client.dal_get_one.side_effect = router.dal_get_one
         client.dal_put.side_effect = router.dal_put

@@ -2,6 +2,30 @@
 
 All notable changes to this integration are documented here. The newest version is at the top.
 
+## [0.2.4] - 2026-11-26
+
+Privacy and robustness improvements from a review of the whole integration.
+
+### Changed
+
+- The clients sensor no longer lists host names, IP and MAC addresses in its attributes; only the count remains.
+- The `zyxel_router_sms_received` event now carries `entry_id`, `index`, `from` and `time`. The message text is only included when the new option *Include SMS text in events* is enabled, because events are stored in the recorder database.
+- The fast poll interval option was removed (Home Assistant guideline). Signal and traffic are polled every 30 seconds; to poll less often, disable polling in the system options and update from an automation, see the README.
+- Diagnostics redact passwords, PINs, PUKs, APN and GPON credentials and similar fields on all models, not only a fixed list, and no longer send a request to the router.
+- Network mode select and roaming switch are removed from the entity registry when *Allow cellular changes* is turned off instead of staying as unavailable entities.
+- SIM status and WAN type are enum sensors; the SIM ready binary sensor is unknown instead of "problem" when the router reports no SIM status.
+- Reconfigure keeps the stored password when the field is left empty; reauthentication checks that the credentials belong to the same router.
+- Device information (firmware version) updates without a reload.
+- Minimum Home Assistant version is 2025.3.
+- Errors from the router are shown translated; precondition errors (cellular changes disabled, change in progress) no longer produce a traceback.
+
+### Fixed
+
+- If Home Assistant reloads the integration or restarts while a cellular change is being verified, the watchdog logs a warning that the change was not verified instead of disappearing silently.
+- An unexpected error during setup shows "Unexpected error" instead of crashing the dialog.
+- Values of a router object that stops responding are cleared instead of staying stale.
+- Error messages no longer embed whole HTTP response bodies.
+
 ## [0.2.3] - 2026-11-26
 
 ### Changed
@@ -83,6 +107,7 @@ First release.
 - `dal_get` and `dal_set` expert actions, SMS event, diagnostics.
 - English and German translations, Zyxel logo.
 
+[0.2.4]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Gulasch404/ha_zyxel/compare/v0.2.0...v0.2.1

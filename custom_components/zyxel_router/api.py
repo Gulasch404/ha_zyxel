@@ -33,6 +33,16 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 30
 
 
+def _summary(data: Any) -> str:
+    """Short, secret-free description of a response for error messages."""
+    if isinstance(data, dict):
+        parts = [f"{k}={data[k]}" for k in ("result", "ReplyMsg") if data.get(k)]
+        return ", ".join(parts) or "unexpected JSON response"
+    if isinstance(data, str):
+        return "non-JSON response" if data.lstrip().startswith("<") else data[:120]
+    return type(data).__name__
+
+
 class ZyxelError(Exception):
     """Generic Zyxel API error."""
 
@@ -178,7 +188,8 @@ class ZyxelClient:
         iv = _random_b64()
         if rsa is not None:
             self._aes_key = _random_b64()
-        assert self._aes_key
+        if not self._aes_key:
+            raise ZyxelError("No AES key, login first")
         out = {"content": _aes_encrypt(plain, self._aes_key, iv), "key": "", "iv": iv}
         if rsa is not None:
             out["key"] = base64.b64encode(
@@ -206,7 +217,8 @@ class ZyxelClient:
                 self._encrypt = False
             else:
                 loaded = serialization.load_pem_public_key(pem.encode())
-                assert isinstance(loaded, RSAPublicKey)
+                if not isinstance(loaded, RSAPublicKey):
+                    raise ZyxelError("Router returned an unsupported public key")
                 rsa = loaded
         payload = {
             "Input_Account": self._username,
@@ -223,7 +235,7 @@ class ZyxelClient:
                 "Router reports an active login of this user (web interface open?)"
             )
         if status in (401, 403) or not isinstance(data, dict):
-            raise ZyxelAuthError(f"Login failed (HTTP {status}): {data}")
+            raise ZyxelAuthError(f"Login failed (HTTP {status}): {_summary(data)}")
         if data.get("result") not in (None, "ZCFG_SUCCESS"):
             raise ZyxelAuthError(f"Login failed: {data.get('result')}")
         self.logged_in = True
@@ -269,7 +281,7 @@ class ZyxelClient:
                 method, path, params=params, payload=payload, relogin=False, timeout=timeout
             )
         if status >= 400:
-            raise ZyxelApiError(f"{method} {path}: HTTP {status}: {data}")
+            raise ZyxelApiError(f"{method} {path}: HTTP {status}: {_summary(data)}")
         if isinstance(data, str):
             data = json.loads(_unescape(data)) if data.startswith(("{", "[")) else data
         return data

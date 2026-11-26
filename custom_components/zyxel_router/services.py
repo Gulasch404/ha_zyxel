@@ -13,7 +13,7 @@ from homeassistant.core import (
     SupportsResponse,
     callback,
 )
-from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.service import async_register_admin_service
@@ -34,7 +34,7 @@ from .const import (
     SERVICE_SET_NR_CELL_LOCK,
     SERVICE_SET_PREFERRED_BANDS,
 )
-from .coordinator import ZyxelCoordinator
+from .coordinator import ZyxelCoordinator, communication_error
 
 ATTR_DEVICE_ID = "device_id"
 
@@ -141,7 +141,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
         try:
             await coordinator.client.dal_delete("cellwan_sms", objIndex=str(call.data["index"]))
         except ZyxelError as err:
-            raise HomeAssistantError(str(err)) from err
+            raise communication_error(err) from err
         await coordinator.async_request_full_refresh()
 
     async def dal_get(call: ServiceCall) -> ServiceResponse:
@@ -149,7 +149,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
         try:
             objects = await coordinator.client.dal_get(call.data["oid"])
         except ZyxelError as err:
-            raise HomeAssistantError(str(err)) from err
+            raise communication_error(err) from err
         return {"objects": objects}
 
     async def dal_set(call: ServiceCall) -> ServiceResponse:
@@ -168,7 +168,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
             else:
                 result = await coordinator.client.dal_delete(oid, **params)
         except ZyxelError as err:
-            raise HomeAssistantError(str(err)) from err
+            raise communication_error(err) from err
         await coordinator.async_request_full_refresh()
         return {"result": result if isinstance(result, dict) else {"raw": result}}
 

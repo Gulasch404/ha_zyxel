@@ -61,6 +61,9 @@ def _uptime(seconds: Any) -> datetime | None:
     return ts.replace(second=0, microsecond=0)
 
 
+# Link types the router reports (lower-cased); translated in strings.json
+WAN_TYPES = ["atm", "cell", "dsl", "eth", "pon", "ptm", "usb"]
+
 _SIM_STATES = {
     "RDY": "ready",
     "NOT_INSERTED": "not_inserted",
@@ -74,7 +77,7 @@ def _sim_status(raw: str | None) -> str | None:
     if not raw:
         return None
     code = raw.removeprefix("DEVST_SIM_").upper()
-    return _SIM_STATES.get(code, code.lower())
+    return _SIM_STATES.get(code, "error")
 
 
 def _mbit(value: float | None) -> float | None:
@@ -312,6 +315,8 @@ SENSORS: tuple[ZyxelSensorDescription, ...] = (
         translation_key="sim_status",
         feature=FEATURE_CELLULAR,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.ENUM,
+        options=sorted(set(_SIM_STATES.values())),
         value_fn=lambda d: _sim_status(d.cell.get("USIM_Status") or d.sim.get("USIM_Status")),
     ),
     ZyxelSensorDescription(
@@ -422,18 +427,9 @@ SENSORS: tuple[ZyxelSensorDescription, ...] = (
         key="clients",
         translation_key="clients",
         state_class=SensorStateClass.MEASUREMENT,
+        # Host names, IPs and MACs are deliberately not exposed as attributes
+        # (recorder, dashboards); only the count is.
         value_fn=lambda d: len(d.active_hosts),
-        attr_fn=lambda d: {
-            "hosts": [
-                {
-                    "name": h.get("HostName") or h.get("DeviceName"),
-                    "ip": h.get("IPAddress"),
-                    "mac": h.get("PhysAddress"),
-                    "connection": h.get("X_ZYXEL_ConnectionType"),
-                }
-                for h in d.active_hosts
-            ]
-        },
     ),
     ZyxelSensorDescription(
         key="wifi_clients",
@@ -461,7 +457,9 @@ SENSORS: tuple[ZyxelSensorDescription, ...] = (
         key="wan_type",
         translation_key="wan_type",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda d: d.wan_link_type,
+        device_class=SensorDeviceClass.ENUM,
+        options=WAN_TYPES,
+        value_fn=lambda d: d.wan_link_type if d.wan_link_type in WAN_TYPES else None,
         attr_fn=lambda d: {
             "encapsulation": d.wan.get("Encapsulation"),
             "connection": d.wan.get("pppConnectionStatus") or d.wan.get("Status"),

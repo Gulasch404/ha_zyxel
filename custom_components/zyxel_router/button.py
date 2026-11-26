@@ -5,11 +5,10 @@ from __future__ import annotations
 from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .api import ZyxelConnectionError, ZyxelError
-from .coordinator import ZyxelConfigEntry, ZyxelCoordinator
+from .coordinator import ZyxelConfigEntry, ZyxelCoordinator, communication_error
 from .entity import ZyxelEntity
 
 PARALLEL_UPDATES = 1
@@ -40,7 +39,7 @@ class ZyxelRebootButton(ZyxelEntity, ButtonEntity):
         except ZyxelConnectionError:
             pass  # device often drops the connection while rebooting
         except ZyxelError as err:
-            raise HomeAssistantError(f"Reboot failed: {err}") from err
+            raise communication_error(err) from err
         self.coordinator.client.logged_in = False
 
 

@@ -16,6 +16,7 @@
       },
       "reauth_confirm": {
         "title": "Re-authenticate",
+        "description": "The router at {host} rejected the login. Enter the current credentials of its web interface.",
         "data": {
           "username": "Username",
           "password": "Password"
@@ -23,6 +24,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure",
+        "description": "Change the connection settings of the router at {host}. Leave the password empty to keep the stored one.",
         "data": {
           "host": "Host",
           "username": "Username",
@@ -52,17 +54,17 @@
       "init": {
         "title": "Options",
         "data": {
-          "scan_interval": "Fast poll interval (s)",
           "slow_interval": "Slow poll interval (s)",
           "allow_cellular_changes": "Allow cellular changes",
           "revert_timeout": "Auto-revert timeout (s)",
+          "sms_content_in_events": "Include SMS text in events",
           "allow_raw_writes": "Allow raw DAL writes (expert)"
         },
         "data_description": {
-          "scan_interval": "Signal and traffic.",
           "slow_interval": "Device info, SIM, bands, locks, WLAN, GNSS, SMS.",
           "allow_cellular_changes": "Enables network mode, band/cell lock and roaming controls. Every change is verified and reverted automatically if the connection does not come back.",
           "revert_timeout": "Time the connection has to come back after a cellular change before the previous setting is restored.",
+          "sms_content_in_events": "Adds the message text to the zyxel_router_sms_received event. Events are stored in the recorder database; off by default.",
           "allow_raw_writes": "Allows the dal_set action. Not protected by the watchdog!"
         }
       }
@@ -363,6 +365,9 @@
     },
     "wlan_psk_missing": {
       "message": "The router did not return the passphrase of WiFi {ssid}. Refusing to write, as this would reset the WiFi password."
+    },
+    "communication_error": {
+      "message": "Communication with the router failed: {error}"
     },
     "sms_not_supported": {
       "message": "This device does not support SMS."

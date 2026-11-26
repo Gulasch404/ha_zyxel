@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 from typing import Final
 
 DOMAIN: Final = "zyxel_router"
@@ -13,11 +12,11 @@ CONF_ALLOW_CELLULAR_CHANGES: Final = "allow_cellular_changes"
 CONF_ALLOW_RAW_WRITES: Final = "allow_raw_writes"
 CONF_REVERT_TIMEOUT: Final = "revert_timeout"
 CONF_SLOW_INTERVAL: Final = "slow_interval"
+CONF_SMS_CONTENT_IN_EVENTS: Final = "sms_content_in_events"
 
 DEFAULT_HOST: Final = "http://192.168.1.1"
 DEFAULT_USERNAME: Final = "admin"
 DEFAULT_SCAN_INTERVAL: Final = 30
-MIN_SCAN_INTERVAL: Final = 10
 DEFAULT_SLOW_INTERVAL: Final = 300
 DEFAULT_REVERT_TIMEOUT: Final = 240
 
@@ -78,5 +77,3 @@ NETWORK_MODE_OPTIONS: Final = {
     "LTE": "lte",
     "UMTS": "umts",
 }
-
-FAST_INTERVAL_DEFAULT: Final = timedelta(seconds=DEFAULT_SCAN_INTERVAL)

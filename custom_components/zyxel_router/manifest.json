@@ -13,9 +13,6 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Gulasch404/ha_zyxel/issues",
-  "loggers": [
-    "custom_components.zyxel_router"
-  ],
   "requirements": [],
-  "version": "0.2.3"
+  "version": "0.2.4"
 }

@@ -59,8 +59,11 @@ BINARY_SENSORS: tuple[ZyxelBinaryDescription, ...] = (
         device_class=BinarySensorDeviceClass.PROBLEM,
         entity_category=EntityCategory.DIAGNOSTIC,
         # PROBLEM => on when SIM not ready
-        value_fn=lambda d: (d.cell.get("USIM_Status") or d.sim.get("USIM_Status"))
-        != "DEVST_SIM_RDY",
+        value_fn=lambda d: (
+            None
+            if (status := d.cell.get("USIM_Status") or d.sim.get("USIM_Status")) is None
+            else status != "DEVST_SIM_RDY"
+        ),
     ),
     ZyxelBinaryDescription(
         key="band_lock",

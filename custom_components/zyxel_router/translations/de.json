@@ -16,6 +16,7 @@
       },
       "reauth_confirm": {
         "title": "Erneut anmelden",
+        "description": "Der Router unter {host} hat die Anmeldung abgelehnt. Gib die aktuellen Zugangsdaten seiner Weboberfläche ein.",
         "data": {
           "username": "Benutzername",
           "password": "Passwort"
@@ -23,6 +24,7 @@
       },
       "reconfigure": {
         "title": "Neu konfigurieren",
+        "description": "Verbindungseinstellungen des Routers unter {host} ändern. Passwort leer lassen, um das gespeicherte zu behalten.",
         "data": {
           "host": "Host",
           "username": "Benutzername",
@@ -52,17 +54,17 @@
       "init": {
         "title": "Optionen",
         "data": {
-          "scan_interval": "Schnelles Abfrageintervall (s)",
           "slow_interval": "Langsames Abfrageintervall (s)",
           "allow_cellular_changes": "Mobilfunk-Änderungen erlauben",
           "revert_timeout": "Auto-Revert-Zeitlimit (s)",
+          "sms_content_in_events": "SMS-Text in Events aufnehmen",
           "allow_raw_writes": "Rohe DAL-Schreibzugriffe erlauben (Experte)"
         },
         "data_description": {
-          "scan_interval": "Signal und Traffic.",
           "slow_interval": "Geräteinfo, SIM, Bänder, Locks, WLAN, GNSS, SMS.",
           "allow_cellular_changes": "Aktiviert Netzmodus, Band-/Zell-Lock und Roaming. Jede Änderung wird überwacht und automatisch zurückgenommen, wenn die Verbindung nicht wiederkommt.",
           "revert_timeout": "Zeit, in der die Verbindung nach einer Mobilfunk-Änderung wiederkommen muss, bevor die vorherige Einstellung wiederhergestellt wird.",
+          "sms_content_in_events": "Fügt den Nachrichtentext zum Event zyxel_router_sms_received hinzu. Events werden in der Recorder-Datenbank gespeichert; standardmäßig aus.",
           "allow_raw_writes": "Erlaubt die Aktion dal_set. Nicht durch den Watchdog geschützt!"
         }
       }
@@ -363,6 +365,9 @@
     },
     "wlan_psk_missing": {
       "message": "Der Router hat das Passwort von WLAN {ssid} nicht zurückgegeben. Schreiben wird verweigert, da dies das WLAN-Passwort zurücksetzen würde."
+    },
+    "communication_error": {
+      "message": "Kommunikation mit dem Router fehlgeschlagen: {error}"
     },
     "sms_not_supported": {
       "message": "Dieses Gerät unterstützt keine SMS."
